@@ -1,0 +1,30 @@
+{
+  "createdAt": "2026-03-10T20:35:05Z",
+  "baseUrl": "https://cpmn8n.deseo-services.com",
+  "results": [
+    {
+      "name": "MBH - 20 Event Hub (Full Notion Router, V2)",
+      "id": "vHbB0roB4wtMhqtE",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/v2/events/full"
+    },
+    {
+      "name": "MBH - 21 HITL Application Decision (V2)",
+      "id": "roi7FC2wWuMwKPQb",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/v2/hitl/application/decision"
+    },
+    {
+      "name": "MBH - 22 HITL Upgrade Decision (V2)",
+      "id": "kxwqHyO0JcFZ3Bol",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/v2/hitl/upgrade/decision"
+    }
+  ]
+}

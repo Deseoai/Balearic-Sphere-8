@@ -1,0 +1,461 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ── Backgrounds ─────────────────────────── */
+  --bg-0: #0C0B09;
+  --bg-1: #141210;
+
+  /* ── Surfaces ────────────────────────────── */
+  --surface-0: rgba(255, 248, 235, 0.025);
+  --surface-1: rgba(255, 248, 235, 0.042);
+  --surface-2: rgba(255, 248, 235, 0.065);
+
+  /* ── Borders ─────────────────────────────── */
+  --line-soft:   rgba(196, 151, 58, 0.10);
+  --line-strong: rgba(196, 151, 58, 0.22);
+  --line-gold:   rgba(196, 151, 58, 0.42);
+
+  /* ── Typography ──────────────────────────── */
+  --text-primary:   #EDE5D0;
+  --text-secondary: #9A9080;
+  --text-accent:    #C4973A;
+  --subdued:        #7A7268;
+
+  /* ── Accents ─────────────────────────────── */
+  --gold:       #C4973A;
+  --gold-light: #D4A84A;
+  --champagne:  #E8D5A8;
+  --danger:     #C97B6E;
+
+  /* ── Extended palette ───────────────────── */
+  --sapphire:       #3B6FA8;
+  --sapphire-glow:  rgba(59, 111, 168, 0.35);
+  --forest:         #4A7C59;
+  --forest-glow:    rgba(74, 124, 89, 0.35);
+  --crimson:        #9B3A4A;
+  --crimson-glow:   rgba(155, 58, 74, 0.35);
+  --amethyst:       #7B5EA7;
+  --amethyst-glow:  rgba(123, 94, 167, 0.35);
+  --copper:         #B87333;
+  --copper-glow:    rgba(184, 115, 51, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  color: var(--text-primary);
+  background: var(--bg-0);
+}
+
+body {
+  line-height: 1.6;
+  font-feature-settings: "salt" 1, "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button, a, input, textarea, select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible, a:focus-visible,
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 1.5px solid rgba(196, 151, 58, 0.55);
+  outline-offset: 2px;
+}
+
+main { position: relative; }
+
+/* ── App Shell ───────────────────────────────────────────────── */
+.app-shell {
+  margin-inline: auto;
+  width: min(1200px, 100%);
+  min-height: 100vh;
+  padding: 12px 12px 100px;
+}
+
+@media (min-width: 640px) {
+  .app-shell { padding: 16px 20px 36px; }
+}
+
+/* ── Surface Cards ───────────────────────────────────────────── */
+.surface-stage,
+.panel-card-strong {
+  background: linear-gradient(145deg,
+    rgba(255, 248, 235, 0.042),
+    rgba(255, 248, 235, 0.024));
+  border: 1px solid var(--line-strong);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.60),
+    0 8px 24px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 248, 235, 0.07);
+  backdrop-filter: blur(16px);
+}
+
+.surface-elevated,
+.panel-card {
+  background: linear-gradient(145deg,
+    rgba(255, 248, 235, 0.034),
+    rgba(255, 248, 235, 0.018));
+  border: 1px solid var(--line-soft);
+  box-shadow:
+    0 20px 56px rgba(0, 0, 0, 0.50),
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 248, 235, 0.05);
+  backdrop-filter: blur(12px);
+}
+
+.surface-muted,
+.surface-utility {
+  background: rgba(255, 248, 235, 0.025);
+  border: 1px solid rgba(196, 151, 58, 0.08);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.premium-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Gold — primary CTA */
+.btn-primary,
+.accent-button {
+  border: 1px solid rgba(196, 151, 58, 0.55);
+  background: linear-gradient(135deg, #8B6520 0%, #C4973A 45%, #D4A84A 100%);
+  color: #0C0B09;
+  font-weight: 700;
+  box-shadow:
+    0 8px 28px rgba(196, 151, 58, 0.32),
+    0 2px 8px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 248, 235, 0.20);
+  text-shadow: none;
+}
+
+/* Champagne — secondary CTA */
+.btn-secondary,
+.sun-button {
+  border: 1px solid rgba(232, 213, 168, 0.32);
+  background: linear-gradient(135deg, rgba(232, 213, 168, 0.10), rgba(232, 213, 168, 0.20));
+  color: var(--champagne);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(232, 213, 168, 0.12);
+}
+
+/* Ghost pill */
+.btn-quiet,
+.soft-pill {
+  border-radius: 999px;
+  border: 1px solid rgba(196, 151, 58, 0.20);
+  background: rgba(255, 248, 235, 0.04);
+  color: var(--text-secondary);
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-quiet:hover,
+.soft-pill:hover {
+  border-color: rgba(196, 151, 58, 0.40);
+  color: var(--champagne);
+  background: rgba(196, 151, 58, 0.06);
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.accent-button:hover,
+.sun-button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 40px rgba(196, 151, 58, 0.40),
+    0 4px 12px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 248, 235, 0.22);
+}
+
+.btn-primary:active,
+.btn-secondary:active,
+.btn-quiet:active,
+.accent-button:active,
+.sun-button:active {
+  transform: scale(0.982);
+}
+
+/* VIP Pitch button — deep amethyst */
+.btn-vip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(123, 94, 167, 0.55);
+  background: linear-gradient(135deg, rgba(60, 30, 90, 0.80), rgba(123, 94, 167, 0.55));
+  color: #e0d4f7;
+  box-shadow:
+    0 8px 28px rgba(123, 94, 167, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.btn-vip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 40px rgba(123, 94, 167, 0.40);
+}
+
+/* ── Status Chips ────────────────────────────────────────────── */
+.status-chip {
+  border-radius: 999px;
+  padding: 0.20rem 0.65rem;
+  font-size: 0.70rem;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+}
+
+.status-under_review, .status-queued, .status-running, .status-active {
+  background: rgba(196, 151, 58, 0.12);
+  color: var(--champagne);
+  border-color: rgba(196, 151, 58, 0.28);
+}
+
+.status-accepted, .status-approved, .status-completed {
+  background: rgba(74, 124, 89, 0.14);
+  color: #b0d4b8;
+  border-color: rgba(74, 124, 89, 0.30);
+}
+
+.status-rejected, .status-failed, .status-closed {
+  background: rgba(155, 58, 74, 0.14);
+  color: #e8b4bc;
+  border-color: rgba(155, 58, 74, 0.30);
+}
+
+.status-waitlisted, .status-paused, .status-pending {
+  background: rgba(150, 150, 150, 0.10);
+  color: #b8b0a0;
+  border-color: rgba(150, 150, 150, 0.22);
+}
+
+/* ── VIP Badge ───────────────────────────────────────────────── */
+.vip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  padding: 0.22rem 0.60rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.10em;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, rgba(212, 168, 74, 0.20), rgba(196, 151, 58, 0.12));
+  border: 1px solid rgba(212, 168, 74, 0.50);
+  color: #D4A84A;
+  box-shadow: 0 0 12px rgba(212, 168, 74, 0.20);
+}
+
+/* ── Form Controls ───────────────────────────────────────────── */
+.field-control {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(196, 151, 58, 0.20);
+  background: rgba(255, 248, 235, 0.04);
+  color: var(--text-primary);
+  padding: 0.72rem 0.90rem;
+  font-size: 0.92rem;
+  outline: none;
+  font-family: var(--font-sans);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.field-control::placeholder { color: rgba(110, 101, 88, 0.70); }
+
+.field-control:focus {
+  border-color: rgba(196, 151, 58, 0.52);
+  box-shadow: 0 0 0 3px rgba(196, 151, 58, 0.13);
+}
+
+/* ── Sticky CTA ──────────────────────────────────────────────── */
+.sticky-mobile-cta {
+  position: sticky;
+  bottom: 76px;
+  background: rgba(14, 13, 11, 0.92);
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 0.5rem;
+  backdrop-filter: blur(14px);
+}
+
+@media (min-width: 640px) {
+  .sticky-mobile-cta { bottom: 12px; }
+}
+
+/* ── Sheet Backdrop ──────────────────────────────────────────── */
+.sheet-backdrop {
+  background: rgba(8, 7, 6, 0.80);
+  backdrop-filter: blur(10px);
+}
+
+/* ── AI Concierge ────────────────────────────────────────────── */
+.concierge-panel {
+  background: linear-gradient(160deg,
+    rgba(18, 15, 10, 0.97),
+    rgba(14, 12, 8, 0.97));
+  border: 1px solid var(--line-strong);
+  box-shadow:
+    0 32px 72px rgba(0, 0, 0, 0.65),
+    0 8px 24px rgba(196, 151, 58, 0.08);
+}
+
+.concierge-pill {
+  border-radius: 999px;
+  border: 1px solid var(--line-gold);
+  background: rgba(196, 151, 58, 0.12);
+  color: var(--champagne);
+  box-shadow: 0 8px 24px rgba(196, 151, 58, 0.15);
+}
+
+.concierge-chip {
+  border-radius: 999px;
+  border: 1px solid var(--line-soft);
+  background: rgba(255, 248, 235, 0.05);
+  color: var(--text-secondary);
+}
+
+/* ── Admin Details ───────────────────────────────────────────── */
+.app-detail-grid { display: grid; gap: 0.5rem; }
+
+.app-detail-item {
+  border-radius: 12px;
+  border: 1px solid rgba(196, 151, 58, 0.12);
+  background: rgba(255, 248, 235, 0.025);
+  padding: 0.6rem 0.75rem;
+}
+
+.app-detail-label {
+  color: var(--text-secondary);
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.app-detail-value {
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  margin-top: 0.2rem;
+  white-space: pre-wrap;
+}
+
+.decision-bar {
+  background: rgba(255, 248, 235, 0.025);
+  border: 1px solid var(--line-soft);
+}
+
+/* ── AI Rail offset ──────────────────────────────────────────── */
+@media (max-width: 1023px) { .lg\:with-ai-rail { padding-right: 0; } }
+@media (min-width: 1024px) { .lg\:with-ai-rail { padding-right: 344px; } }
+
+/* ── Luxury Divider ──────────────────────────────────────────── */
+.divider-gold {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-gold), transparent);
+}
+
+/* ── Gradient text ───────────────────────────────────────────── */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #C4973A, #E8D5A8, #C4973A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-amethyst {
+  background: linear-gradient(135deg, #7B5EA7, #C4A8E8, #7B5EA7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Input range (sliders) ───────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(196, 151, 58, 0.20);
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(196, 151, 58, 0.25);
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(196, 151, 58, 0.20); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(196, 151, 58, 0.35); }
+
+/* ── Select dropdown ─────────────────────────────────────────── */
+select.field-control option {
+  background: #1A1712;
+  color: var(--text-primary);
+}
+
+/* ── Pitch cards ──────────────────────────────────────────────── */
+.pitch-card {
+  border-radius: 1.2rem;
+  padding: 1.2rem 1.4rem;
+  background: linear-gradient(145deg,
+    rgba(123, 94, 167, 0.08),
+    rgba(123, 94, 167, 0.03));
+  border: 1px solid rgba(123, 94, 167, 0.22);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.pitch-card:hover {
+  border-color: rgba(123, 94, 167, 0.38);
+  box-shadow: 0 12px 36px rgba(123, 94, 167, 0.14);
+}
+
+/* ── Category accent rings ────────────────────────────────────── */
+.ring-sapphire  { box-shadow: 0 0 0 2px var(--sapphire-glow); }
+.ring-forest    { box-shadow: 0 0 0 2px var(--forest-glow); }
+.ring-crimson   { box-shadow: 0 0 0 2px var(--crimson-glow); }
+.ring-amethyst  { box-shadow: 0 0 0 2px var(--amethyst-glow); }
+.ring-gold      { box-shadow: 0 0 0 2px rgba(196, 151, 58, 0.40); }

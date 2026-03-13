@@ -1,0 +1,30 @@
+{
+  "createdAt": "2026-03-10T20:17:36Z",
+  "baseUrl": "https://cpmn8n.deseo-services.com",
+  "results": [
+    {
+      "name": "MBH - 00 Event Hub (All-in-One)",
+      "id": "EoQPYfbhOK3atwdr",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/events/all"
+    },
+    {
+      "name": "MBH - 10 HITL Application Decision",
+      "id": "nt4CAqPNjuVlT7Mj",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/hitl/application/decision"
+    },
+    {
+      "name": "MBH - 11 HITL Upgrade Decision",
+      "id": "RpYAjguxEXNaasfK",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/hitl/upgrade/decision"
+    }
+  ]
+}

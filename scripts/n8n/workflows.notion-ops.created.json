@@ -1,0 +1,38 @@
+{
+  "createdAt": "2026-03-10T20:31:32Z",
+  "baseUrl": "https://cpmn8n.deseo-services.com",
+  "results": [
+    {
+      "name": "MBH - 01 Event Hub (Full Notion Router)",
+      "id": "pcILb2TNizFRmvml",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/events/full"
+    },
+    {
+      "name": "MBH - 12 HITL Applications Poller",
+      "id": "omf6mFYLDTbC8CWQ",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": null
+    },
+    {
+      "name": "MBH - 13 HITL Upgrades Poller",
+      "id": "5GPxn2QtJIeBwxlC",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": null
+    },
+    {
+      "name": "MBH - 90 Global Error Logger",
+      "id": "4MB82ZrI2Ugraxyq",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": null
+    }
+  ]
+}

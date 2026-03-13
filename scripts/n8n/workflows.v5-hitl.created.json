@@ -1,0 +1,23 @@
+{
+  "createdAt": "2026-03-10T20:59:43Z",
+  "baseUrl": "https://cpmn8n.deseo-services.com",
+  "notionCredentialId": "luvMj9AQiA4Ye6I8",
+  "results": [
+    {
+      "name": "MBH - 51 HITL Application Decision (V5)",
+      "id": "mpQWFdttUTDSk6xn",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/v5/hitl/application/decision"
+    },
+    {
+      "name": "MBH - 52 HITL Upgrade Decision (V5)",
+      "id": "JWOhM1rbwOxSsqSh",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/v5/hitl/upgrade/decision"
+    }
+  ]
+}

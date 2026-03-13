@@ -1,0 +1,42 @@
+{
+  "createdAt": "2026-03-10T21:10:38Z",
+  "baseUrl": "https://cpmn8n.deseo-services.com",
+  "results": [
+    {
+      "name": "MBH - 61 HITL Applications Poller (V6)",
+      "id": "4ZdZt6sFWIyzlhE8",
+      "created": false,
+      "active": null,
+      "activationError": null,
+      "skippedReason": "already_exists",
+      "webhookProductionUrl": null
+    },
+    {
+      "name": "MBH - 62 HITL Upgrades Poller (V6)",
+      "id": "qhEdMT1Sgp5l9p6l",
+      "created": false,
+      "active": null,
+      "activationError": null,
+      "skippedReason": "already_exists",
+      "webhookProductionUrl": null
+    },
+    {
+      "name": "MBH - 63 AI Requests Worker (V6)",
+      "id": "Aef6XHFYhAA5Wcae",
+      "created": false,
+      "active": null,
+      "activationError": null,
+      "skippedReason": "already_exists",
+      "webhookProductionUrl": null
+    },
+    {
+      "name": "MBH - 64 Weekly Strategic Brief Generator (V6B)",
+      "id": "Ba5b0Sr01e5pMMdC",
+      "created": true,
+      "active": true,
+      "activationError": null,
+      "skippedReason": null,
+      "webhookProductionUrl": null
+    }
+  ]
+}

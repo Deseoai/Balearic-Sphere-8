@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Balea Sphere Review Center</title>
+  <style>
+    :root {
+      --bg: #f2e8d8;
+      --panel: #fff7ec;
+      --panel-2: #faefde;
+      --line: #c8b192;
+      --text: #2e2118;
+      --muted: #75614f;
+      --accent: #2d8e75;
+      --ok: #2bb673;
+      --warn: #a8834f;
+      --err: #c96a3c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Manrope", "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 10% -10%, rgba(201,106,60,.20), transparent 35%),
+        radial-gradient(circle at 85% -30%, rgba(45,142,117,.12), transparent 35%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      background: rgba(255, 248, 235, .88);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .header {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1.4fr 1fr 1fr auto auto;
+      align-items: end;
+    }
+    .title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .brand img {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 1px solid rgba(201, 106, 60, .35);
+      background: #fff;
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+    label { display: grid; gap: 6px; font-size: 12px; color: var(--muted); }
+    input, select, textarea, button {
+      border: 1px solid var(--line);
+      background: #fffdf7;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    button {
+      background: linear-gradient(130deg, #c96a3c, #de8a57);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 42px;
+    }
+    button.ghost {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+    .status {
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      display: inline-block;
+    }
+    .under_review { background: rgba(255, 191, 63, .15); color: var(--warn); }
+    .accepted, .approved, .completed { background: rgba(43, 182, 115, .16); color: var(--ok); }
+    .rejected, .failed { background: rgba(242, 95, 92, .16); color: var(--err); }
+    .waitlisted { background: rgba(45, 142, 117, .16); color: var(--accent); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .list {
+      display: grid;
+      gap: 12px;
+      max-height: 70vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .row {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+    .row .head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .row .meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .decision {
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .decision .full { grid-column: 1 / -1; }
+    .tiny { font-size: 12px; color: var(--muted); }
+    @media (max-width: 1040px) {
+      .grid { grid-template-columns: 1fr; }
+      .header { grid-template-columns: 1fr; }
+      .decision { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <div class="brand">
+        <img src="./logo_balear.png" alt="Balea Sphere logo" />
+        <h1 class="title">Balea Sphere Review Center</h1>
+      </div>
+      <p class="muted">Hier entscheidest du Bewerbungen und Circle-Upgrades. Jede Entscheidung wird automatisch in Notion dokumentiert.</p>
+      <div class="header">
+        <label>API-Adresse
+          <input id="apiBase" value="https://api.balea-sphere8.com" />
+        </label>
+        <label>Admin-Token
+          <input id="adminToken" type="password" placeholder="x-admin-token" />
+        </label>
+        <label>Reviewer Name
+          <input id="reviewer" value="admin" />
+        </label>
+        <button id="saveConfig" class="ghost">Save</button>
+        <button id="refresh">Neu laden</button>
+      </div>
+      <p id="topStatus" class="tiny"></p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2 style="margin:0 0 10px;">Bewerbungen</h2>
+        <div id="applications" class="list"></div>
+      </article>
+
+      <article class="card">
+        <h2 style="margin:0 0 10px;">Circle-Upgrades</h2>
+        <div id="upgrades" class="list"></div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    const storageKeys = {
+      apiBase: 'bs_admin_api_base',
+      token: 'bs_admin_token',
+      reviewer: 'bs_admin_reviewer'
+    };
+
+    const apiBaseEl = document.getElementById('apiBase');
+    const tokenEl = document.getElementById('adminToken');
+    const reviewerEl = document.getElementById('reviewer');
+    const topStatusEl = document.getElementById('topStatus');
+    const appsEl = document.getElementById('applications');
+    const upgradesEl = document.getElementById('upgrades');
+
+    const accessLevels = ['explorer', 'curated', 'verified', 'insider', 'private_circle_eligible'];
+
+    function loadConfig() {
+      apiBaseEl.value = localStorage.getItem(storageKeys.apiBase) || apiBaseEl.value;
+      tokenEl.value = localStorage.getItem(storageKeys.token) || '';
+      reviewerEl.value = localStorage.getItem(storageKeys.reviewer) || reviewerEl.value;
+    }
+
+    function saveConfig() {
+      localStorage.setItem(storageKeys.apiBase, apiBaseEl.value.trim());
+      localStorage.setItem(storageKeys.token, tokenEl.value.trim());
+      localStorage.setItem(storageKeys.reviewer, reviewerEl.value.trim());
+      topStatus('Config saved');
+    }
+
+    function topStatus(message, isError = false) {
+      topStatusEl.textContent = message;
+      topStatusEl.style.color = isError ? 'var(--err)' : 'var(--muted)';
+    }
+
+    async function api(path, options = {}) {
+      const base = apiBaseEl.value.trim().replace(/\/$/, '');
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      const token = tokenEl.value.trim();
+      if (token) headers['x-admin-token'] = token;
+
+      const response = await fetch(base + path, {
+        method: options.method || 'GET',
+        headers,
+        body: options.body ? JSON.stringify(options.body) : undefined
+      });
+
+      const contentType = response.headers.get('content-type') || '';
+      const body = contentType.includes('application/json') ? await response.json() : await response.text();
+      if (!response.ok) {
+        throw new Error(typeof body === 'string' ? body : JSON.stringify(body));
+      }
+      return body;
+    }
+
+    function badge(status) {
+      const label = status === 'waitlisted' ? 'on_hold' : status;
+      return `<span class="status ${status}">${label}</span>`;
+    }
+
+    function appCard(item) {
+      const id = item.id;
+      const levelOptions = accessLevels
+        .map((level) => `<option value="${level}" ${level === item.recommendedAccessLevel ? 'selected' : ''}>${level}</option>`)
+        .join('');
+
+      return `
+        <div class="row" data-app-id="${id}">
+          <div class="head">
+            <strong>${item.name || 'Unnamed applicant'}</strong>
+            ${badge(item.status)}
+          </div>
+          <div class="meta">
+            <span>ID: ${id}</span>
+            <span>Email: ${item.email || '-'}</span>
+            <span>Category: ${item.category || '-'}</span>
+            <span>AI Score: ${item.aiPreScore ?? 0}</span>
+          </div>
+          <div class="tiny">${item.whyJoin || ''}</div>
+          <div class="decision">
+            <label>Status
+              <select class="app-status">
+                <option value="accepted">accepted</option>
+                <option value="rejected">rejected</option>
+                <option value="waitlisted">on_hold</option>
+              </select>
+            </label>
+            <label>Human Score
+              <input class="app-human-score" type="number" min="0" max="100" value="${item.humanScore ?? ''}" />
+            </label>
+            <label>Recommended Access
+              <select class="app-access-level">${levelOptions}</select>
+            </label>
+            <label>Reviewer
+              <input class="app-reviewer" value="${reviewerEl.value.trim() || 'admin'}" />
+            </label>
+            <label class="full">Admin Notes
+              <textarea class="app-notes">${item.adminNotes || ''}</textarea>
+            </label>
+            <button class="submit-app">Submit Decision</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function upgradeCard(item) {
+      const id = item.id;
+      return `
+        <div class="row" data-upgrade-id="${id}">
+          <div class="head">
+            <strong>${item.circle || 'Unknown circle'}</strong>
+            ${badge(item.status)}
+          </div>
+          <div class="meta">
+            <span>ID: ${id}</span>
+            <span>User: ${item.userId || '-'}</span>
+            <span>Current Access: ${item.currentAccess || '-'}</span>
+            <span>AI Suitability: ${item.aiSuitability ?? 0}</span>
+          </div>
+          <div class="tiny">${item.reason || ''}</div>
+          <div class="decision">
+            <label>Status
+              <select class="upgrade-status">
+                <option value="approved">approved</option>
+                <option value="rejected">rejected</option>
+                <option value="waitlisted">on_hold</option>
+              </select>
+            </label>
+            <label>Reviewer
+              <input class="upgrade-reviewer" value="${reviewerEl.value.trim() || 'admin'}" />
+            </label>
+            <label class="full">Decision Notes
+              <textarea class="upgrade-notes">${item.decisionNotes || ''}</textarea>
+            </label>
+            <button class="submit-upgrade">Submit Decision</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function refreshAll() {
+      try {
+        topStatus('Loading pending reviews...');
+        const [apps, upgrades] = await Promise.all([
+          api('/v1/admin/access-requests?status=under_review'),
+          api('/v1/admin/circle-upgrades?status=under_review')
+        ]);
+
+        appsEl.innerHTML = (apps.items || []).length
+          ? apps.items.map(appCard).join('')
+          : '<div class="tiny">No applications under review.</div>';
+
+        upgradesEl.innerHTML = (upgrades.items || []).length
+          ? upgrades.items.map(upgradeCard).join('')
+          : '<div class="tiny">No upgrade requests under review.</div>';
+
+        bindActions();
+        topStatus(`Loaded ${apps.items.length} applications and ${upgrades.items.length} upgrades.`);
+      } catch (error) {
+        topStatus(`Load failed: ${error.message}`, true);
+      }
+    }
+
+    function bindActions() {
+      document.querySelectorAll('.submit-app').forEach((button) => {
+        button.onclick = async () => {
+          const row = button.closest('[data-app-id]');
+          const id = row.getAttribute('data-app-id');
+          const status = row.querySelector('.app-status').value;
+          const humanScoreValue = row.querySelector('.app-human-score').value;
+          const recommendedAccessLevel = row.querySelector('.app-access-level').value;
+          const reviewedBy = row.querySelector('.app-reviewer').value || 'admin';
+          const adminNotes = row.querySelector('.app-notes').value;
+
+          button.disabled = true;
+          button.textContent = 'Sending...';
+          try {
+            const result = await api(`/v1/admin/access-requests/${id}/decision`, {
+              method: 'POST',
+              body: {
+                status,
+                humanScore: humanScoreValue === '' ? undefined : Number(humanScoreValue),
+                recommendedAccessLevel,
+                adminNotes,
+                reviewedBy
+              }
+            });
+            topStatus(`Application ${id} decided (${status}). Dispatch: ${result.hitlDispatch?.ok ? 'ok' : 'failed'}`);
+            await refreshAll();
+          } catch (error) {
+            topStatus(`Decision failed for ${id}: ${error.message}`, true);
+          } finally {
+            button.disabled = false;
+            button.textContent = 'Submit Decision';
+          }
+        };
+      });
+
+      document.querySelectorAll('.submit-upgrade').forEach((button) => {
+        button.onclick = async () => {
+          const row = button.closest('[data-upgrade-id]');
+          const id = row.getAttribute('data-upgrade-id');
+          const status = row.querySelector('.upgrade-status').value;
+          const reviewedBy = row.querySelector('.upgrade-reviewer').value || 'admin';
+          const decisionNotes = row.querySelector('.upgrade-notes').value;
+
+          button.disabled = true;
+          button.textContent = 'Sending...';
+          try {
+            const result = await api(`/v1/admin/circle-upgrades/${id}/decision`, {
+              method: 'POST',
+              body: {
+                status,
+                decisionNotes,
+                reviewedBy
+              }
+            });
+            topStatus(`Upgrade ${id} decided (${status}). Dispatch: ${result.hitlDispatch?.ok ? 'ok' : 'failed'}`);
+            await refreshAll();
+          } catch (error) {
+            topStatus(`Decision failed for ${id}: ${error.message}`, true);
+          } finally {
+            button.disabled = false;
+            button.textContent = 'Submit Decision';
+          }
+        };
+      });
+    }
+
+    document.getElementById('saveConfig').onclick = saveConfig;
+    document.getElementById('refresh').onclick = refreshAll;
+
+    loadConfig();
+    refreshAll();
+  </script>
+</body>
+</html>

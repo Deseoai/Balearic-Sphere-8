@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Balea Sphere Partner Bereich</title>
+  <style>
+    :root {
+      --bg: #f2e8d8;
+      --panel: #fff7ec;
+      --panel-2: #faefde;
+      --line: #c8b192;
+      --text: #2e2118;
+      --muted: #75614f;
+      --accent: #2d8e75;
+      --ok: #2bb673;
+      --err: #c96a3c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Manrope", "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 88% -20%, rgba(201,106,60,.18), transparent 42%),
+        radial-gradient(circle at 8% 8%, rgba(45,142,117,.12), transparent 36%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      background: rgba(255, 248, 235, .88);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .brand img {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 1px solid rgba(201, 106, 60, .35);
+      background: #fff;
+    }
+    h1, h2, h3 { margin: 0; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .top {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1.2fr 1fr auto;
+      align-items: end;
+    }
+    label { display: grid; gap: 6px; font-size: 12px; color: var(--muted); }
+    input, select, textarea, button {
+      border: 1px solid var(--line);
+      background: #fffdf7;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
+    }
+    textarea { min-height: 84px; resize: vertical; }
+    button {
+      background: linear-gradient(130deg, #c96a3c, #de8a57);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ghost {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+    .list {
+      display: grid;
+      gap: 10px;
+      max-height: 340px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .item {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 12px;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(45,142,117,.15);
+      color: var(--accent);
+    }
+    .status.accepted, .status.approved, .status.active, .status.completed { background: rgba(43,182,115,.15); color: var(--ok); }
+    .status.rejected, .status.failed, .status.closed { background: rgba(242,95,92,.15); color: var(--err); }
+    .tiny { font-size: 12px; color: var(--muted); }
+    @media (max-width: 1080px) {
+      .top, .grid, .grid-3, .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <div class="brand">
+        <img src="./logo_balear.png" alt="Balea Sphere logo" />
+        <h1 style="font-size:24px;">Balea Sphere Partner Bereich</h1>
+      </div>
+      <p class="muted">Stelle Circle-Anfragen, veröffentliche Chancen und nutze AI-Hilfe. Alles wird automatisch in Notion synchronisiert.</p>
+      <div class="top">
+        <label>API-Adresse
+          <input id="apiBase" value="https://api.balea-sphere8.com" />
+        </label>
+        <label>User ID
+          <input id="userId" value="partner_demo_001" />
+        </label>
+        <button id="refreshAll" class="ghost">Daten aktualisieren</button>
+      </div>
+      <p id="topStatus" class="tiny"></p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2 style="margin-bottom:10px;">Circle-Zugang anfragen</h2>
+        <div class="form-grid">
+          <label>Circle
+            <input id="upgradeCircle" placeholder="Investors Circle" />
+          </label>
+          <label>Aktuelles Level
+            <select id="upgradeAccess">
+              <option>explorer</option>
+              <option>curated</option>
+              <option>verified</option>
+              <option>insider</option>
+              <option>private_circle_eligible</option>
+            </select>
+          </label>
+          <label>Relevanz (0-100)
+            <input id="upgradeAi" type="number" min="0" max="100" value="72" />
+          </label>
+          <label class="full">Begründung
+            <textarea id="upgradeReason" placeholder="Warum passt dieser Zugang zu dir?"></textarea>
+          </label>
+          <button id="submitUpgrade">Anfrage senden</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 style="margin-bottom:10px;">Schnelle AI-Empfehlung</h2>
+        <div class="form-grid">
+          <label class="full">Dein Ziel
+            <textarea id="conciergeIntent" placeholder="Wen sollte ich diese Woche für Hospitality-Wachstum treffen?"></textarea>
+          </label>
+          <label>Ort
+            <input id="conciergeLocation" value="Mallorca" />
+          </label>
+          <button id="runConcierge">Empfehlung holen</button>
+          <label class="full">Ergebnis
+            <textarea id="conciergeResult" readonly></textarea>
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2 style="margin-bottom:10px;">Marketplace-Chance veröffentlichen</h2>
+        <div class="form-grid">
+          <label>Titel
+            <input id="listingTitle" placeholder="Strategic hospitality partnership" />
+          </label>
+          <label>Typ
+            <select id="listingType">
+              <option value="opportunity">opportunity</option>
+              <option value="request">request</option>
+              <option value="offer">offer</option>
+              <option value="collaboration">collaboration</option>
+              <option value="premium_access">premium_access</option>
+              <option value="event_seat">event_seat</option>
+              <option value="strategic_need">strategic_need</option>
+              <option value="private_deal">private_deal</option>
+            </select>
+          </label>
+          <label>Kategorie
+            <input id="listingCategory" placeholder="hospitality" value="hospitality" />
+          </label>
+          <label>Sichtbarkeit
+            <select id="listingVisibility">
+              <option>members</option>
+              <option>circle</option>
+              <option>private</option>
+            </select>
+          </label>
+          <label class="full">Kurzbeschreibung
+            <textarea id="listingSummary" placeholder="Kurz und klar: worum geht es?"></textarea>
+          </label>
+          <label class="full">Beschreibung
+            <textarea id="listingDescription" placeholder="Was genau bietest oder suchst du?"></textarea>
+          </label>
+          <label>Credit-Kosten
+            <input id="listingCredits" type="number" min="0" max="10000" value="10" />
+          </label>
+          <label>Trust-Anforderung
+            <input id="listingTrust" type="number" min="0" max="100" value="50" />
+          </label>
+          <button id="submitListing">Veröffentlichen</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 style="margin-bottom:10px;">Vertiefte AI-Anfrage</h2>
+        <div class="form-grid">
+          <label>Anfrage-Typ
+            <select id="aiPromptType">
+              <option>concierge</option>
+              <option>matchmaking</option>
+              <option>intro_engine</option>
+              <option>profile_optimization</option>
+              <option>deal_radar</option>
+              <option>marketplace_assistant</option>
+              <option>summary</option>
+              <option>reputation_signal</option>
+            </select>
+          </label>
+          <label class="full">Frage
+            <textarea id="aiPrompt" placeholder="Nenne mir 5 relevante Introductions für diese Woche"></textarea>
+          </label>
+          <button id="submitAi">Anfrage starten</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid-3">
+      <article class="card">
+        <h3 style="margin-bottom:10px;">My Upgrade Requests</h3>
+        <div id="upgradeList" class="list"></div>
+      </article>
+      <article class="card">
+        <h3 style="margin-bottom:10px;">My Listings</h3>
+        <div id="listingList" class="list"></div>
+      </article>
+      <article class="card">
+        <h3 style="margin-bottom:10px;">My AI Requests</h3>
+        <div id="aiList" class="list"></div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    const storeKeys = {
+      apiBase: 'bs_partner_api_base',
+      userId: 'bs_partner_user_id'
+    };
+
+    const apiBaseEl = document.getElementById('apiBase');
+    const userIdEl = document.getElementById('userId');
+    const topStatusEl = document.getElementById('topStatus');
+    const upgradeListEl = document.getElementById('upgradeList');
+    const listingListEl = document.getElementById('listingList');
+    const aiListEl = document.getElementById('aiList');
+
+    function loadConfig() {
+      apiBaseEl.value = localStorage.getItem(storeKeys.apiBase) || apiBaseEl.value;
+      userIdEl.value = localStorage.getItem(storeKeys.userId) || userIdEl.value;
+    }
+
+    function saveConfig() {
+      localStorage.setItem(storeKeys.apiBase, apiBaseEl.value.trim());
+      localStorage.setItem(storeKeys.userId, userIdEl.value.trim());
+    }
+
+    function topStatus(message, isError = false) {
+      topStatusEl.textContent = message;
+      topStatusEl.style.color = isError ? 'var(--err)' : 'var(--muted)';
+    }
+
+    async function api(path, options = {}) {
+      const base = apiBaseEl.value.trim().replace(/\/$/, '');
+      const response = await fetch(base + path, {
+        method: options.method || 'GET',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        body: options.body ? JSON.stringify(options.body) : undefined
+      });
+
+      const contentType = response.headers.get('content-type') || '';
+      const body = contentType.includes('application/json') ? await response.json() : await response.text();
+      if (!response.ok) {
+        throw new Error(typeof body === 'string' ? body : JSON.stringify(body));
+      }
+      return body;
+    }
+
+    function statusBadge(value) {
+      return `<span class="status ${value || ''}">${value || 'unknown'}</span>`;
+    }
+
+    function renderItem(el, rows, render) {
+      if (!rows || rows.length === 0) {
+        el.innerHTML = '<div class="tiny">No records yet.</div>';
+        return;
+      }
+      el.innerHTML = rows.map(render).join('');
+    }
+
+    async function refreshData() {
+      try {
+        saveConfig();
+        const userId = userIdEl.value.trim();
+        if (!userId) throw new Error('Please set user ID');
+
+        topStatus('Loading data...');
+        const [upgrades, listings, ai] = await Promise.all([
+          api(`/v1/circle-access-requests?userId=${encodeURIComponent(userId)}`),
+          api(`/v1/marketplace/listings?postedBy=${encodeURIComponent(userId)}`),
+          api(`/v1/ai/requests?userId=${encodeURIComponent(userId)}`)
+        ]);
+
+        renderItem(upgradeListEl, upgrades.items, (row) => `
+          <div class="item">
+            <strong>${row.circle}</strong>
+            <div>${statusBadge(row.status)}</div>
+            <div class="tiny">Access: ${row.currentAccess} | AI: ${row.aiSuitability}</div>
+            <div class="tiny">${row.reason || ''}</div>
+          </div>
+        `);
+
+        renderItem(listingListEl, listings.items, (row) => `
+          <div class="item">
+            <strong>${row.title}</strong>
+            <div>${statusBadge(row.status)}</div>
+            <div class="tiny">${row.type} | ${row.category}</div>
+            <div class="tiny">${row.summary || ''}</div>
+          </div>
+        `);
+
+        renderItem(aiListEl, ai.items, (row) => `
+          <div class="item">
+            <strong>${row.promptType}</strong>
+            <div>${statusBadge(row.status)}</div>
+            <div class="tiny">${row.prompt || ''}</div>
+            <div class="tiny">${row.responseSummary || ''}</div>
+          </div>
+        `);
+
+        topStatus(`Loaded ${upgrades.items.length} upgrades, ${listings.items.length} listings, ${ai.items.length} AI requests.`);
+      } catch (error) {
+        topStatus(`Load failed: ${error.message}`, true);
+      }
+    }
+
+    document.getElementById('submitUpgrade').onclick = async () => {
+      try {
+        const userId = userIdEl.value.trim();
+        const payload = {
+          userId,
+          circle: document.getElementById('upgradeCircle').value.trim(),
+          currentAccess: document.getElementById('upgradeAccess').value,
+          aiSuitability: Number(document.getElementById('upgradeAi').value || 0),
+          reason: document.getElementById('upgradeReason').value.trim()
+        };
+        await api('/v1/circle-access-requests', { method: 'POST', body: payload });
+        topStatus('Upgrade request submitted.');
+        await refreshData();
+      } catch (error) {
+        topStatus(`Upgrade request failed: ${error.message}`, true);
+      }
+    };
+
+    document.getElementById('submitListing').onclick = async () => {
+      try {
+        const userId = userIdEl.value.trim();
+        const payload = {
+          postedBy: userId,
+          title: document.getElementById('listingTitle').value.trim(),
+          type: document.getElementById('listingType').value,
+          category: document.getElementById('listingCategory').value.trim(),
+          summary: document.getElementById('listingSummary').value.trim(),
+          description: document.getElementById('listingDescription').value.trim(),
+          visibility: document.getElementById('listingVisibility').value,
+          creditsCost: Number(document.getElementById('listingCredits').value || 0),
+          trustRequirement: Number(document.getElementById('listingTrust').value || 0)
+        };
+        await api('/v1/marketplace/listings', { method: 'POST', body: payload });
+        topStatus('Listing published.');
+        await refreshData();
+      } catch (error) {
+        topStatus(`Listing failed: ${error.message}`, true);
+      }
+    };
+
+    document.getElementById('submitAi').onclick = async () => {
+      try {
+        const userId = userIdEl.value.trim();
+        const payload = {
+          userId,
+          promptType: document.getElementById('aiPromptType').value,
+          prompt: document.getElementById('aiPrompt').value.trim()
+        };
+        await api('/v1/ai/requests', { method: 'POST', body: payload });
+        topStatus('AI request queued.');
+        await refreshData();
+      } catch (error) {
+        topStatus(`AI queue failed: ${error.message}`, true);
+      }
+    };
+
+    document.getElementById('runConcierge').onclick = async () => {
+      try {
+        const userId = userIdEl.value.trim();
+        const payload = {
+          userId,
+          intent: document.getElementById('conciergeIntent').value.trim(),
+          location: document.getElementById('conciergeLocation').value.trim()
+        };
+        const result = await api('/v1/ai/concierge', { method: 'POST', body: payload });
+        document.getElementById('conciergeResult').value = result.response || '';
+        topStatus(`Concierge response ready (request ${result.requestId}).`);
+        await refreshData();
+      } catch (error) {
+        topStatus(`Concierge failed: ${error.message}`, true);
+      }
+    };
+
+    document.getElementById('refreshAll').onclick = refreshData;
+
+    loadConfig();
+    refreshData();
+  </script>
+</body>
+</html>

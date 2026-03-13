@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-03-10T21:11:00Z",
+  "activeMbhWorkflows": [
+    {
+      "id": "ncyo3PN7kzXde0kA",
+      "name": "MBH - 39 Global Error Logger (V3 Credential)"
+    },
+    {
+      "id": "IMMYNiSeNH6xIEZy",
+      "name": "MBH - 40 Event Hub (V4 Final)"
+    },
+    {
+      "id": "mpQWFdttUTDSk6xn",
+      "name": "MBH - 51 HITL Application Decision (V5)"
+    },
+    {
+      "id": "JWOhM1rbwOxSsqSh",
+      "name": "MBH - 52 HITL Upgrade Decision (V5)"
+    },
+    {
+      "id": "4ZdZt6sFWIyzlhE8",
+      "name": "MBH - 61 HITL Applications Poller (V6)"
+    },
+    {
+      "id": "qhEdMT1Sgp5l9p6l",
+      "name": "MBH - 62 HITL Upgrades Poller (V6)"
+    },
+    {
+      "id": "Aef6XHFYhAA5Wcae",
+      "name": "MBH - 63 AI Requests Worker (V6)"
+    },
+    {
+      "id": "Ba5b0Sr01e5pMMdC",
+      "name": "MBH - 64 Weekly Strategic Brief Generator (V6B)"
+    }
+  ],
+  "inactiveMbhWorkflows": [
+    {
+      "id": "JUQh7JFdyshJjZyE",
+      "name": "MBH - 64 Weekly Strategic Brief Generator (V6)",
+      "reason": "Activation failed (deprecated)"
+    }
+  ]
+}

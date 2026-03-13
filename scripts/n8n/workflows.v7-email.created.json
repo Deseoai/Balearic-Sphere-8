@@ -1,0 +1,19 @@
+{
+  "baseUrl": "https://cpmn8n.deseo-services.com",
+  "smtpCredential": {
+    "id": "F0s6SnWdDO6rAPj8",
+    "name": "CPM Neu"
+  },
+  "results": [
+    {
+      "name": "MBH - 71 Email Alerts Router (V7)",
+      "id": "GiYvcu4mMhmuD5ou",
+      "created": false,
+      "updated": true,
+      "active": true,
+      "activationError": null,
+      "skippedReason": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/v7/email/alerts"
+    }
+  ]
+}

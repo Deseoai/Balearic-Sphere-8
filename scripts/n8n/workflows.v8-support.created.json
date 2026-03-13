@@ -1,0 +1,19 @@
+{
+  "baseUrl": "https://cpmn8n.deseo-services.com",
+  "openAiCredential": {
+    "id": "QLqiRswUCqAj267r",
+    "name": "OpenAi account_Altinger"
+  },
+  "results": [
+    {
+      "name": "MBH - 81 Support Assistant (V8)",
+      "id": "Hw2mTKeFWlbgStMZ",
+      "created": true,
+      "updated": false,
+      "active": true,
+      "activationError": null,
+      "skippedReason": null,
+      "webhookProductionUrl": "https://cpmn8n.deseo-services.com/webhook/mbh/v8/support/chat"
+    }
+  ]
+}

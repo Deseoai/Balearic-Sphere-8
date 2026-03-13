@@ -1,0 +1,242 @@
+{
+  "databases": [
+    {
+      "key": "applications",
+      "title": "Applications",
+      "description": "Access requests and review decisions",
+      "properties": {
+        "Application ID": { "type": "rich_text" },
+        "Name": { "type": "title" },
+        "Email": { "type": "email" },
+        "Category": {
+          "type": "select",
+          "options": ["investor", "founder", "creator", "service", "hospitality", "real_estate", "advisor", "other"]
+        },
+        "Location": { "type": "rich_text" },
+        "What Offer": { "type": "rich_text" },
+        "What Seek": { "type": "rich_text" },
+        "Why Join": { "type": "rich_text" },
+        "Status": { "type": "status", "options": ["under_review", "waitlisted", "accepted", "rejected"] },
+        "AI Score": { "type": "number" },
+        "Human Score": { "type": "number" },
+        "Recommended Access": {
+          "type": "select",
+          "options": ["explorer", "curated", "verified", "insider", "private_circle_eligible"]
+        },
+        "Admin Notes": { "type": "rich_text" },
+        "Submitted At": { "type": "date" },
+        "Reviewed At": { "type": "date" },
+        "Decision By": { "type": "people" }
+      }
+    },
+    {
+      "key": "users",
+      "title": "Users",
+      "description": "Member master view for moderation and operations",
+      "properties": {
+        "User ID": { "type": "title" },
+        "Email": { "type": "email" },
+        "Role": {
+          "type": "select",
+          "options": ["applicant", "member", "verified_member", "premium_member", "circle_member", "moderator", "admin", "super_admin"]
+        },
+        "Access Level": {
+          "type": "select",
+          "options": ["explorer", "curated", "verified", "insider", "private_circle_eligible"]
+        },
+        "Verification Status": { "type": "select", "options": ["none", "pending", "verified", "rejected"] },
+        "Trust Score": { "type": "number" },
+        "Contribution Score": { "type": "number" },
+        "Connector Score": { "type": "number" },
+        "Created At": { "type": "date" }
+      }
+    },
+    {
+      "key": "profiles",
+      "title": "Profiles",
+      "description": "Public and private profile metadata",
+      "properties": {
+        "Profile ID": { "type": "title" },
+        "User ID": { "type": "rich_text" },
+        "Display Name": { "type": "rich_text" },
+        "Headline": { "type": "rich_text" },
+        "Short Bio": { "type": "rich_text" },
+        "Long Bio": { "type": "rich_text" },
+        "Tags": { "type": "multi_select", "options": [] },
+        "Location": { "type": "rich_text" },
+        "Offer": { "type": "rich_text" },
+        "Seek": { "type": "rich_text" },
+        "Website": { "type": "url" },
+        "LinkedIn": { "type": "url" },
+        "Instagram": { "type": "url" },
+        "Visibility": { "type": "select", "options": ["public", "members", "private"] },
+        "Updated At": { "type": "date" }
+      }
+    },
+    {
+      "key": "credits_ledger",
+      "title": "Credits Ledger",
+      "description": "Immutable record of credit transactions",
+      "properties": {
+        "Transaction ID": { "type": "title" },
+        "User ID": { "type": "rich_text" },
+        "Type": {
+          "type": "select",
+          "options": ["welcome_bonus", "profile_completion", "verification_bonus", "contribution_reward", "invite_reward", "spend_unlock", "spend_ai", "purchase", "refund"]
+        },
+        "Source": { "type": "select", "options": ["free", "earned", "purchased", "promotional"] },
+        "Amount": { "type": "number" },
+        "Reason": { "type": "rich_text" },
+        "Reference ID": { "type": "rich_text" },
+        "Created At": { "type": "date" }
+      }
+    },
+    {
+      "key": "marketplace_listings",
+      "title": "Marketplace Listings",
+      "description": "Listings for opportunities and requests",
+      "properties": {
+        "Listing ID": { "type": "title" },
+        "Posted By": { "type": "rich_text" },
+        "Type": {
+          "type": "select",
+          "options": ["opportunity", "request", "offer", "collaboration", "premium_access", "event_seat", "strategic_need", "private_deal"]
+        },
+        "Category": { "type": "rich_text" },
+        "Title": { "type": "rich_text" },
+        "Summary": { "type": "rich_text" },
+        "Description": { "type": "rich_text" },
+        "Visibility": { "type": "select", "options": ["members", "circle", "private"] },
+        "Status": { "type": "status", "options": ["active", "paused", "closed"] },
+        "Credits Cost": { "type": "number" },
+        "Trust Requirement": { "type": "number" },
+        "Created At": { "type": "date" }
+      }
+    },
+    {
+      "key": "forum_posts",
+      "title": "Forum Posts",
+      "description": "Forum questions and expert answers",
+      "properties": {
+        "Post ID": { "type": "title" },
+        "Room": { "type": "select", "options": ["real_estate", "hospitality", "tech_ai", "investors", "founders", "legal_tax", "luxury", "creator_economy"] },
+        "Author ID": { "type": "rich_text" },
+        "Topic": { "type": "rich_text" },
+        "Content": { "type": "rich_text" },
+        "AI Summary": { "type": "rich_text" },
+        "Quality Score": { "type": "number" },
+        "Reward Credits": { "type": "number" },
+        "Moderation Status": { "type": "status", "options": ["approved", "needs_review", "rejected"] },
+        "Created At": { "type": "date" }
+      }
+    },
+    {
+      "key": "intro_requests",
+      "title": "Intro Requests",
+      "description": "Member intro requests and outcomes",
+      "properties": {
+        "Intro ID": { "type": "title" },
+        "Requester ID": { "type": "rich_text" },
+        "Target User ID": { "type": "rich_text" },
+        "Message": { "type": "rich_text" },
+        "Status": { "type": "status", "options": ["pending", "accepted", "declined", "expired"] },
+        "Credits Spent": { "type": "number" },
+        "Created At": { "type": "date" }
+      }
+    },
+    {
+      "key": "circle_access_requests",
+      "title": "Circle Access Requests",
+      "description": "Human-in-the-loop approvals for private circles",
+      "properties": {
+        "Request ID": { "type": "title" },
+        "User ID": { "type": "rich_text" },
+        "Circle": { "type": "rich_text" },
+        "Current Access": {
+          "type": "select",
+          "options": ["explorer", "curated", "verified", "insider", "private_circle_eligible"]
+        },
+        "AI Suitability": { "type": "number" },
+        "Status": { "type": "status", "options": ["under_review", "approved", "rejected", "waitlisted"] },
+        "Reason": { "type": "rich_text" },
+        "Reviewed By": { "type": "people" },
+        "Reviewed At": { "type": "date" }
+      }
+    },
+    {
+      "key": "ai_requests",
+      "title": "AI Requests",
+      "description": "Trace of AI interactions and costs",
+      "properties": {
+        "AI Request ID": { "type": "title" },
+        "User ID": { "type": "rich_text" },
+        "Prompt Type": { "type": "select", "options": ["concierge", "matchmaking", "intro_engine", "profile_optimization", "deal_radar", "marketplace_assistant", "summary", "reputation_signal"] },
+        "Prompt": { "type": "rich_text" },
+        "Response Summary": { "type": "rich_text" },
+        "Model": { "type": "rich_text" },
+        "Credits Used": { "type": "number" },
+        "Status": { "type": "status", "options": ["queued", "running", "completed", "failed"] },
+        "Created At": { "type": "date" },
+        "Completed At": { "type": "date" }
+      }
+    },
+    {
+      "key": "notifications",
+      "title": "Notifications",
+      "description": "Operational notification events",
+      "properties": {
+        "Notification ID": { "type": "title" },
+        "User ID": { "type": "rich_text" },
+        "Kind": { "type": "rich_text" },
+        "Title": { "type": "rich_text" },
+        "Body": { "type": "rich_text" },
+        "Channel": { "type": "select", "options": ["in_app", "email", "push", "digest"] },
+        "Read At": { "type": "date" },
+        "Created At": { "type": "date" }
+      }
+    },
+    {
+      "key": "reputation_events",
+      "title": "Reputation Events",
+      "description": "Signals feeding trust/contribution scoring",
+      "properties": {
+        "Reputation Event ID": { "type": "title" },
+        "User ID": { "type": "rich_text" },
+        "Event Type": { "type": "rich_text" },
+        "Score Delta": { "type": "number" },
+        "Reason": { "type": "rich_text" },
+        "Created At": { "type": "date" }
+      }
+    },
+    {
+      "key": "audit_logs",
+      "title": "Audit Logs",
+      "description": "Security and admin action audit trail",
+      "properties": {
+        "Audit ID": { "type": "title" },
+        "Actor User ID": { "type": "rich_text" },
+        "Action": { "type": "rich_text" },
+        "Target Type": { "type": "rich_text" },
+        "Target ID": { "type": "rich_text" },
+        "Metadata": { "type": "rich_text" },
+        "Created At": { "type": "date" }
+      }
+    },
+    {
+      "key": "webhook_events",
+      "title": "Webhook Events",
+      "description": "Outbox/inbox mirror for reliability and troubleshooting",
+      "properties": {
+        "Event ID": { "type": "title" },
+        "Direction": { "type": "select", "options": ["outbound", "inbound"] },
+        "Topic": { "type": "rich_text" },
+        "Status": { "type": "status", "options": ["queued", "sent", "acked", "failed", "ignored"] },
+        "Attempts": { "type": "number" },
+        "Source": { "type": "rich_text" },
+        "Destination": { "type": "rich_text" },
+        "Error": { "type": "rich_text" },
+        "Created At": { "type": "date" }
+      }
+    }
+  ]
+}
