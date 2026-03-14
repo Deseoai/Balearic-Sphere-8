@@ -1,0 +1,18 @@
+export const C = {
+  obsidian: "#0C0B09",
+  charcoal: "#141210",
+  surface: "#1A1814",
+  surfaceElevated: "#201E1A",
+  border: "rgba(196,151,58,0.18)",
+  borderStrong: "rgba(196,151,58,0.35)",
+  gold: "#C4973A",
+  goldLight: "#D4A84A",
+  champagne: "#E8D5A8",
+  ink: "#EDE5D0",
+  muted: "#6E6558",
+  subdued: "#9A9085",
+  danger: "#C97B6E",
+  dangerBg: "rgba(201,123,110,0.10)",
+  goldBg: "rgba(196,151,58,0.10)",
+  goldBgStrong: "rgba(196,151,58,0.18)",
+};

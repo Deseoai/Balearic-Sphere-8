@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Balea Sphere",
+    "slug": "balea-sphere",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "balea",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0C0B09"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.baleasphere.app",
+      "buildNumber": "1"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0C0B09"
+      },
+      "package": "com.baleasphere.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#C4973A"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
