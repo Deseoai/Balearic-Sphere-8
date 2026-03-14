@@ -6,3 +6,8 @@ coverage
 .env
 *.log
 .DS_Store
+apps/api/.env.production
+apps/web/.env.local
+apps/web/.env.production
+.env.production
+.env.local
