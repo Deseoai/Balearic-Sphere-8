@@ -2,54 +2,14 @@
 
 import type { ApplicantCategory, IndustrySector } from "@mallorca/shared";
 import { ApplicantCategories, IndustrySectors } from "@mallorca/shared";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { postJson } from "../lib/api";
-
-const revenueOptions = [
-  { value: "under_250k",        label: "Under €250,000" },
-  { value: "250k_to_1m",        label: "€250,000 – €1,000,000" },
-  { value: "1m_to_5m",          label: "€1 million – €5 million" },
-  { value: "over_5m",           label: "Over €5 million" },
-  { value: "prefer_not_to_say", label: "Prefer not to disclose" },
-] as const;
+import { useLang } from "../lib/i18n";
 
 const categories: Array<{ value: ApplicantCategory; label: string }> = ApplicantCategories.map(value => ({
   value,
   label: value.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase()),
 }));
-
-const industryLabels: Record<IndustrySector, string> = {
-  technology:        "Technology & Software",
-  real_estate:       "Real Estate & Property",
-  hospitality:       "Hospitality & Tourism",
-  finance:           "Finance & Banking",
-  investment:        "Investment & Capital",
-  fashion:           "Fashion & Luxury",
-  yachting:          "Yachting & Marine",
-  arts:              "Arts & Culture",
-  wellness:          "Wellness & Health",
-  consulting:        "Consulting & Advisory",
-  legal:             "Legal & Compliance",
-  media:             "Media & Communications",
-  food_beverage:     "Food & Beverage",
-  events:            "Events & Entertainment",
-  jewelry:           "Jewellery & Watches",
-  luxury_goods:      "Luxury Goods & Retail",
-  aviation:          "Aviation & Private Jets",
-  architecture:      "Architecture & Design",
-  interior_design:   "Interior Design",
-  construction:      "Construction & Development",
-  sports:            "Sports & Recreation",
-  education:         "Education & Training",
-  healthcare:        "Healthcare & Life Sciences",
-  agriculture:       "Agriculture & Food Production",
-  crypto_blockchain: "Crypto & Blockchain",
-  sustainability:    "Sustainability & Clean Energy",
-  photography_film:  "Photography & Film",
-  retail:            "Retail & E-Commerce",
-  logistics:         "Logistics & Supply Chain",
-  other:             "Other",
-};
 
 type SubmitState =
   | { type: "idle" }
@@ -75,14 +35,56 @@ const G = {
 };
 
 export function AccessRequestForm() {
+  const { t } = useLang();
   const [state, setState] = useState<SubmitState>({ type: "idle" });
   const [consentChecked, setConsentChecked] = useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
 
+  const revenueOptions = [
+    { value: "under_250k",        label: t("revenue.under_250k") },
+    { value: "250k_to_1m",        label: t("revenue.250k_to_1m") },
+    { value: "1m_to_5m",          label: t("revenue.1m_to_5m") },
+    { value: "over_5m",           label: t("revenue.over_5m") },
+    { value: "prefer_not_to_say", label: t("revenue.prefer_not_to_say") },
+  ];
+
+  const industryLabels: Record<IndustrySector, string> = {
+    technology:        t("industry.technology"),
+    real_estate:       t("industry.real_estate"),
+    hospitality:       t("industry.hospitality"),
+    finance:           t("industry.finance"),
+    investment:        t("industry.investment"),
+    fashion:           t("industry.fashion"),
+    yachting:          t("industry.yachting"),
+    arts:              t("industry.arts"),
+    wellness:          t("industry.wellness"),
+    consulting:        t("industry.consulting"),
+    legal:             t("industry.legal"),
+    media:             t("industry.media"),
+    food_beverage:     t("industry.food_beverage"),
+    events:            t("industry.events"),
+    jewelry:           t("industry.jewelry"),
+    luxury_goods:      t("industry.luxury_goods"),
+    aviation:          t("industry.aviation"),
+    architecture:      t("industry.architecture"),
+    interior_design:   t("industry.interior_design"),
+    construction:      t("industry.construction"),
+    sports:            t("industry.sports"),
+    education:         t("industry.education"),
+    healthcare:        t("industry.healthcare"),
+    agriculture:       t("industry.agriculture"),
+    crypto_blockchain: t("industry.crypto_blockchain"),
+    sustainability:    t("industry.sustainability"),
+    photography_film:  t("industry.photography_film"),
+    retail:            t("industry.retail"),
+    logistics:         t("industry.logistics"),
+    other:             t("industry.other"),
+  };
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
     if (!consentChecked) {
-      setState({ type: "error", message: "Please agree to the data processing terms to submit your application." });
+      setState({ type: "error", message: t("applyForm.consentError") });
       return;
     }
     const form = formRef.current;
@@ -132,7 +134,7 @@ export function AccessRequestForm() {
           className="text-2xl sm:text-3xl"
           style={{ fontFamily: G.display, color: G.champagne, lineHeight: 1.1 }}
         >
-          Application Received
+          {t("applyForm.successTitle")}
         </h3>
         <p className="mt-4 text-sm leading-relaxed" style={{ color: G.muted }}>
           {state.message}
@@ -142,21 +144,20 @@ export function AccessRequestForm() {
           style={{ background: "rgba(255,248,235,0.025)", border: "1px solid rgba(196,151,58,0.12)", maxWidth: "400px" }}
         >
           <span style={{ color: G.muted }}>
-            Reference:{" "}
+            {t("applyForm.reference")}{" "}
             <span className="font-medium" style={{ color: G.champagne }}>
               {state.applicantId.slice(0, 12)}…
             </span>
           </span>
           <span style={{ color: G.muted }}>
-            Suggested level:{" "}
+            {t("applyForm.suggestedLevel")}{" "}
             <span className="font-medium capitalize" style={{ color: G.champagne }}>
               {state.level.replaceAll("_", " ")}
             </span>
           </span>
         </div>
         <p className="mt-6 text-sm leading-relaxed" style={{ color: G.muted }}>
-          Our curation team reviews all applications within 24–48 hours.<br />
-          You will receive a decision by email.
+          {t("applyForm.successReviewNote")}
         </p>
       </div>
     );
@@ -172,21 +173,21 @@ export function AccessRequestForm() {
         style={{ background: "rgba(196,151,58,0.04)", border: "1px solid rgba(196,151,58,0.14)" }}
       >
         <p className="text-[10px] uppercase tracking-[0.32em]" style={{ color: G.gold }}>
-          What we look for
+          {t("applyForm.whatWeLookFor")}
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
           {[
             {
-              title: "Genuine Balearic relevance",
-              text: "You operate, invest, or create within the Mallorca, Ibiza, or Menorca ecosystem — not as a tourist, but as a builder.",
+              title: t("applyForm.criteria1Title"),
+              text: t("applyForm.criteria1Text"),
             },
             {
-              title: "A clear value proposition",
-              text: "You bring something specific and rare: expertise, capital, relationships, or opportunity that the circle cannot easily find elsewhere.",
+              title: t("applyForm.criteria2Title"),
+              text: t("applyForm.criteria2Text"),
             },
             {
-              title: "Mutual fit",
-              text: "You seek meaningful collaboration, not exposure. Every introduction you make reflects on those who introduced you.",
+              title: t("applyForm.criteria3Title"),
+              text: t("applyForm.criteria3Text"),
             },
           ].map(item => (
             <div key={item.title}>
@@ -197,7 +198,7 @@ export function AccessRequestForm() {
           ))}
         </div>
         <p className="mt-5 text-xs leading-relaxed" style={{ color: "rgba(154,144,128,0.75)" }}>
-          Specific, honest answers significantly increase approval speed. Generic applications are typically deferred. Your information is handled confidentially and shared only with the curation team.
+          {t("applyForm.formNote")}
         </p>
       </div>
 
@@ -206,15 +207,15 @@ export function AccessRequestForm() {
 
         {/* Name + Email */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Full Name" name="name" placeholder="Your full name" required />
-          <Field label="Email Address" name="email" type="email" placeholder="name@company.com" required />
+          <Field label={t("applyForm.fieldFullName")} name="name" placeholder={t("applyForm.fieldFullNamePlaceholder")} required />
+          <Field label={t("applyForm.fieldEmail")} name="email" type="email" placeholder={t("applyForm.fieldEmailPlaceholder")} required />
         </div>
 
         {/* Company + Category */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Company / Business Name" name="companyName" placeholder="Your company or brand name" />
+          <Field label={t("applyForm.fieldCompany")} name="companyName" placeholder={t("applyForm.fieldCompanyPlaceholder")} />
           <label className="grid gap-2">
-            <span className="text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>Category</span>
+            <span className="text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>{t("applyForm.fieldCategory")}</span>
             <select name="category" defaultValue="founder" required className="field-control">
               {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
@@ -223,9 +224,9 @@ export function AccessRequestForm() {
 
         {/* Industry */}
         <label className="grid gap-2">
-          <span className="text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>Industry Sector</span>
+          <span className="text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>{t("applyForm.fieldIndustrySector")}</span>
           <select name="industry" className="field-control">
-            <option value="">Select your industry…</option>
+            <option value="">{t("applyForm.fieldIndustryPlaceholder")}</option>
             {IndustrySectors.map(s => (
               <option key={s} value={s}>{industryLabels[s]}</option>
             ))}
@@ -234,13 +235,13 @@ export function AccessRequestForm() {
 
         {/* Location + Revenue */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Location" name="location" placeholder="Mallorca / Ibiza / Menorca / Barcelona" required />
+          <Field label={t("applyForm.fieldLocation")} name="location" placeholder={t("applyForm.fieldLocationPlaceholder")} required />
           <label className="grid gap-2">
             <span className="text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-              Annual Revenue <span style={{ opacity: 0.5 }}>(confidential)</span>
+              {t("applyForm.fieldRevenue")} <span style={{ opacity: 0.5 }}>{t("applyForm.fieldRevenueConfidential")}</span>
             </span>
             <select name="annualRevenue" className="field-control">
-              <option value="">Select a range…</option>
+              <option value="">{t("applyForm.fieldRevenuePlaceholder")}</option>
               {revenueOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </label>
@@ -249,28 +250,28 @@ export function AccessRequestForm() {
           className="rounded-xl px-4 py-3 text-xs leading-relaxed"
           style={{ background: "rgba(196,151,58,0.04)", border: "1px solid rgba(196,151,58,0.12)", color: "rgba(154,144,128,0.80)" }}
         >
-          Revenue figures are strictly confidential and never shared with other members. We reserve the right to verify declared figures internally as part of our curation process.
+          {t("applyForm.revenueNote")}
         </div>
 
         <hr className="divider-gold" />
 
         {/* Key questions */}
         <Textarea
-          label="What value do you bring to this circle?"
+          label={t("applyForm.questionOffer")}
           name="whatOffer"
-          placeholder="Describe your strongest and most specific contribution. Name sectors, deal types, relationships, or expertise. Be concrete — what can members gain from you that they cannot find elsewhere?"
+          placeholder={t("applyForm.questionOfferPlaceholder")}
           required
         />
         <Textarea
-          label="What are you currently seeking?"
+          label={t("applyForm.questionSeek")}
           name="whatSeek"
-          placeholder="Describe your concrete current goals. Are you sourcing capital, partners, properties, operators, or strategic introductions? Precision matters here."
+          placeholder={t("applyForm.questionSeekPlaceholder")}
           required
         />
         <Textarea
-          label="Why are you a strong fit for this private network?"
+          label={t("applyForm.questionWhy")}
           name="whyJoin"
-          placeholder="Explain your Balearic connection, track record, and why collaboration with you is relevant to a curated membership circle. Reference specific projects, relationships, or outcomes if possible."
+          placeholder={t("applyForm.questionWhyPlaceholder")}
           required
         />
 
@@ -279,24 +280,24 @@ export function AccessRequestForm() {
         {/* Social / web */}
         <div>
           <p className="mb-3 text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-            Online Presence
+            {t("applyForm.onlinePresence")}
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="grid gap-2">
               <span className="text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-                Website <span style={{ color: "var(--gold)" }}>*</span>
+                {t("applyForm.fieldWebsite")} <span style={{ color: "var(--gold)" }}>*</span>
               </span>
               <input name="website" type="url" required placeholder="https://" className="field-control" />
             </label>
             <label className="grid gap-2">
               <span className="text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-                LinkedIn <span style={{ opacity: 0.5 }}>(optional)</span>
+                {t("applyForm.fieldLinkedIn")} <span style={{ opacity: 0.5 }}>{t("applyForm.optional")}</span>
               </span>
               <input name="linkedin" type="url" placeholder="https://" className="field-control" />
             </label>
             <label className="grid gap-2">
               <span className="text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-                Instagram <span style={{ opacity: 0.5 }}>(optional)</span>
+                {t("applyForm.fieldInstagram")} <span style={{ opacity: 0.5 }}>{t("applyForm.optional")}</span>
               </span>
               <input name="instagram" type="url" placeholder="https://" className="field-control" />
             </label>
@@ -306,11 +307,11 @@ export function AccessRequestForm() {
         {/* Referral */}
         <div>
           <p className="mb-2 text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-            Referral <span style={{ opacity: 0.5 }}>(optional)</span>
+            {t("applyForm.referral")} <span style={{ opacity: 0.5 }}>{t("applyForm.optional")}</span>
           </p>
-          <Field label="Referred by (email or code)" name="referralCode" placeholder="member@example.com or referral code" />
+          <Field label={t("applyForm.referralLabel")} name="referralCode" placeholder={t("applyForm.referralPlaceholder")} />
           <p className="mt-1 text-[10px]" style={{ color: "rgba(196,151,58,0.45)" }}>
-            If an existing member referred you, enter their email or referral code here.
+            {t("applyForm.referralHint")}
           </p>
         </div>
 
@@ -335,9 +336,16 @@ export function AccessRequestForm() {
             </div>
           </div>
           <p className="text-xs leading-relaxed" style={{ color: G.muted }}>
-            I agree that Balea Sphere stores and processes my personal data for membership administration and network facilitation purposes, in accordance with the{" "}
-            <a href="#data-protection" className="underline" style={{ color: G.gold }}>Privacy &amp; Data Protection Policy</a>.
-            I understand I can request deletion of my data at any time via my account settings.
+            {t("applyForm.consentText").split("Privacy & Data Protection Policy").map((part, i, arr) =>
+              i < arr.length - 1 ? (
+                <span key={i}>
+                  {part}
+                  <a href="#data-protection" className="underline" style={{ color: G.gold }}>Privacy &amp; Data Protection Policy</a>
+                </span>
+              ) : (
+                <span key={i}>{part}</span>
+              )
+            )}
           </p>
         </label>
 
@@ -357,11 +365,11 @@ export function AccessRequestForm() {
           disabled={state.type === "submitting" || !consentChecked}
           className="btn-primary premium-button w-full rounded-xl px-5 py-4 text-sm disabled:opacity-50"
         >
-          {state.type === "submitting" ? "Submitting your application…" : "Submit Application for Review"}
+          {state.type === "submitting" ? t("applyForm.submittingButton") : t("applyForm.submitButton")}
         </button>
 
         <p className="text-center text-xs" style={{ color: "rgba(154,144,128,0.55)" }}>
-          Applications are reviewed within 24–48 hours. You will receive a direct response by email.
+          {t("applyForm.submitNote")}
         </p>
       </form>
     </div>

@@ -3,34 +3,11 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useLang } from "../lib/i18n";
+import { LangToggle } from "./lang-toggle";
 
 const supportEmail = "management@balea-sphere8.com";
 const ADMIN_ROLES = ["admin", "super_admin", "moderator"];
-
-const mainLinks = [
-  { href: "/",           label: "Home",      mobile: "Home" },
-  { href: "/workspace",  label: "Workspace", mobile: "Space" },
-  { href: "/network",    label: "Network",   mobile: "Map" },
-  { href: "/messages",   label: "Messages",  mobile: "Chat" },
-  { href: "/marketplace",label: "Market",    mobile: "Market" },
-  { href: "/pitches",    label: "Pitches",   mobile: "Pitch" },
-  { href: "/events",     label: "Events",    mobile: "Events" },
-] as const;
-
-const baseExtraLinksLoggedOut = [
-  { href: "/guide",          label: "Guide" },
-  { href: "/credits",        label: "Credits" },
-  { href: "/request-access", label: "Apply" },
-] as const;
-
-const baseExtraLinksLoggedIn = [
-  { href: "/guide",          label: "Guide" },
-  { href: "/credits",        label: "Credits" },
-  { href: "/credits?tab=referral", label: "Refer & Earn" },
-] as const;
-
-const adminLink = { href: "/admin", label: "Admin" } as const;
-const settingsLink = { href: "/settings", label: "Settings" } as const;
 
 function active(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
@@ -63,6 +40,7 @@ function getDisplayLabel(user: AuthUser): string {
 export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -133,9 +111,33 @@ export function TopNav() {
     router.push("/");
   }, [router, user]);
 
-  const baseExtraLinks = user ? baseExtraLinksLoggedIn : baseExtraLinksLoggedOut;
+  const mainLinks = [
+    { href: "/",            label: t("nav.home"),      mobile: t("nav.homeMobile") },
+    { href: "/workspace",   label: t("nav.workspace"), mobile: t("nav.workspaceMobile") },
+    { href: "/network",     label: t("nav.network"),   mobile: t("nav.networkMobile") },
+    { href: "/messages",    label: t("nav.messages"),  mobile: t("nav.messagesMobile") },
+    { href: "/marketplace", label: t("nav.market"),    mobile: t("nav.marketMobile") },
+    { href: "/pitches",     label: t("nav.pitches"),   mobile: t("nav.pitchesMobile") },
+    { href: "/events",      label: t("nav.events"),    mobile: t("nav.eventsMobile") },
+  ];
+
+  const baseExtraLinksLoggedOut = [
+    { href: "/guide",          label: t("nav.guide") },
+    { href: "/credits",        label: t("nav.credits") },
+    { href: "/request-access", label: t("nav.apply") },
+  ];
+
+  const baseExtraLinksLoggedIn = [
+    { href: "/guide",                 label: t("nav.guide") },
+    { href: "/credits",               label: t("nav.credits") },
+    { href: "/credits?tab=referral",  label: t("nav.referAndEarn") },
+  ];
+
+  const adminLink = { href: "/admin", label: t("nav.admin") };
   const isElite = user?.isElite ?? false;
-  const eliteLink = { href: "/circle", label: "✦ Circle" } as const;
+  const eliteLink = { href: "/circle", label: t("nav.innerCircle") };
+
+  const baseExtraLinks = user ? baseExtraLinksLoggedIn : baseExtraLinksLoggedOut;
   const extraLinks = isAdmin
     ? [...baseExtraLinks, adminLink]
     : isElite
@@ -179,7 +181,7 @@ export function TopNav() {
                 className="hidden text-[9px] uppercase tracking-[0.28em] sm:block mt-0.5"
                 style={{ color: "var(--text-secondary)" }}
               >
-                Private Balearic Network
+                {t("nav.privateNetwork")}
               </p>
             </div>
           </Link>
@@ -222,8 +224,12 @@ export function TopNav() {
               className="px-3 py-1.5 text-sm rounded-lg transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
-              Support
+              {t("nav.support")}
             </a>
+
+            <div className="mx-2 h-4 w-px" style={{ background: "rgba(196,151,58,0.20)" }} />
+
+            <LangToggle />
 
             <div className="mx-2 h-4 w-px" style={{ background: "rgba(196,151,58,0.20)" }} />
 
@@ -318,7 +324,7 @@ export function TopNav() {
                         style={{ color: "#E8A898" }}
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        Open Admin Panel
+                        {t("nav.openAdminPanel")}
                       </Link>
                     ) : (
                       <>
@@ -328,7 +334,7 @@ export function TopNav() {
                           style={{ color: "var(--text-secondary)" }}
                           onClick={() => setUserMenuOpen(false)}
                         >
-                          Profile &amp; Settings
+                          {t("nav.profileAndSettings")}
                         </Link>
                         <Link
                           href="/workspace"
@@ -336,7 +342,7 @@ export function TopNav() {
                           style={{ color: "var(--text-secondary)" }}
                           onClick={() => setUserMenuOpen(false)}
                         >
-                          My Workspace
+                          {t("nav.myWorkspace")}
                         </Link>
                         {isElite && (
                           <Link
@@ -345,7 +351,7 @@ export function TopNav() {
                             style={{ color: "#D4A84A" }}
                             onClick={() => setUserMenuOpen(false)}
                           >
-                            ✦ Inner Circle
+                            {t("nav.innerCircle")}
                           </Link>
                         )}
                       </>
@@ -356,7 +362,7 @@ export function TopNav() {
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/5"
                       style={{ color: "#E8A898" }}
                     >
-                      Sign Out
+                      {t("nav.signOut")}
                     </button>
                   </div>
                 )}
@@ -371,7 +377,7 @@ export function TopNav() {
                   background: "rgba(196,151,58,0.06)",
                 }}
               >
-                Sign In
+                {t("nav.signIn")}
               </Link>
             )}
           </nav>
@@ -393,7 +399,7 @@ export function TopNav() {
                 className="hidden text-xs px-4 py-1.5 rounded-full sm:block"
                 style={{ border: "1px solid rgba(196,151,58,0.35)", color: "var(--gold)" }}
               >
-                Apply
+                {t("nav.apply")}
               </Link>
             )}
             <button
@@ -407,7 +413,7 @@ export function TopNav() {
                 background: "transparent",
               }}
             >
-              {open ? "Close" : "Menu"}
+              {open ? t("nav.close") : t("nav.menu")}
             </button>
           </div>
         </div>
@@ -434,7 +440,7 @@ export function TopNav() {
                   </p>
                   <p className="text-[11px] truncate mt-0.5" style={{ color: "var(--text-secondary)" }}>{user.email}</p>
                 </div>
-                <span className="text-xs shrink-0 ml-3" style={{ color: "var(--text-secondary)" }}>Profile →</span>
+                <span className="text-xs shrink-0 ml-3" style={{ color: "var(--text-secondary)" }}>{t("nav.profileLink")}</span>
               </Link>
             )}
             {[...mainLinks, ...extraLinks].map((item) => (
@@ -456,15 +462,19 @@ export function TopNav() {
               className="rounded-xl px-4 py-2.5 text-sm"
               style={{ color: "var(--text-secondary)" }}
             >
-              Support
+              {t("nav.support")}
             </a>
+            <div className="flex items-center gap-3 rounded-xl px-4 py-2.5">
+              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Language</span>
+              <LangToggle />
+            </div>
             {user ? (
               <button
                 onClick={() => void handleLogout()}
                 className="mt-1 rounded-xl px-4 py-2.5 text-sm text-left"
                 style={{ color: "#E8A898", border: "1px solid rgba(201,123,110,0.20)" }}
               >
-                Sign Out
+                {t("nav.signOut")}
               </button>
             ) : (
               <Link
@@ -472,7 +482,7 @@ export function TopNav() {
                 className="mt-1 rounded-xl px-4 py-2.5 text-sm text-center"
                 style={{ border: "1px solid rgba(196,151,58,0.35)", color: "var(--gold)" }}
               >
-                Sign In
+                {t("nav.signIn")}
               </Link>
             )}
           </nav>

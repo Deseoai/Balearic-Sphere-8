@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getJson, getSessionToken, postJson } from "../lib/api";
+import { useLang } from "../lib/i18n";
 
 type CreditPackage = { id: "starter" | "growth" | "circle"; label: string; credits: number; priceEur: number; };
 type PackagesResponse = { currency: string; items: CreditPackage[]; };
@@ -12,29 +13,6 @@ type CreditsResponse = { userId: string; balance: number; transactions: CreditTx
 const ACTION_COSTS = {
   aiRequest: 8, concierge: 5, listingPublish: 10, circleRequest: 12, introUnlock: 15,
 } as const;
-
-const PLAN_FRAMING: Record<CreditPackage["id"], {
-  subtitle: string; tagline: string; audience: string; unlocks: string[];
-}> = {
-  starter: {
-    subtitle: "Access Starter",
-    tagline: "First steps, low friction.",
-    audience: "Ideal for new members finding their footing in the circle.",
-    unlocks: ["First qualified introductions", "AI guidance and concierge", "Light marketplace visibility"],
-  },
-  growth: {
-    subtitle: "Circle Momentum",
-    tagline: "For active members building momentum.",
-    audience: "Best for members with consistent weekly engagement.",
-    unlocks: ["Regular introductions and threads", "Steady marketplace activity", "Advanced AI workflows"],
-  },
-  circle: {
-    subtitle: "Inner Circle",
-    tagline: "Full access. No friction.",
-    audience: "For serious operators running multiple strategic tracks simultaneously.",
-    unlocks: ["High-frequency introductions", "Private deal facilitation", "Priority access workflows", "Unlimited AI concierge"],
-  },
-};
 
 const G = {
   gold: "var(--gold)", champagne: "var(--champagne)",
@@ -69,6 +47,7 @@ function estimateFromPlanner(input: { ai: number; intros: number; listings: numb
 type ReferralCode = { code: string; uses: number; rewardPerUse: number; isVip: boolean; referralUrl: string; };
 
 export function CreditsStudio() {
+  const { t } = useLang();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"credits" | "referral">(() =>
     searchParams?.get("tab") === "referral" ? "referral" : "credits"
@@ -90,6 +69,43 @@ export function CreditsStudio() {
   const [referralError, setReferralError] = useState<string | null>(null);
   const [copied, setCopied]             = useState(false);
   const confirmedRef = useRef(false);
+
+  // Plan framing computed with t() so translations work
+  const PLAN_FRAMING: Record<CreditPackage["id"], {
+    subtitle: string; tagline: string; audience: string; unlocks: string[];
+  }> = {
+    starter: {
+      subtitle: t("credits.planStarterSubtitle"),
+      tagline: t("credits.planStarterTagline"),
+      audience: t("credits.planStarterAudience"),
+      unlocks: [
+        t("credits.planStarterUnlock1"),
+        t("credits.planStarterUnlock2"),
+        t("credits.planStarterUnlock3"),
+      ],
+    },
+    growth: {
+      subtitle: t("credits.planGrowthSubtitle"),
+      tagline: t("credits.planGrowthTagline"),
+      audience: t("credits.planGrowthAudience"),
+      unlocks: [
+        t("credits.planGrowthUnlock1"),
+        t("credits.planGrowthUnlock2"),
+        t("credits.planGrowthUnlock3"),
+      ],
+    },
+    circle: {
+      subtitle: t("credits.planCircleSubtitle"),
+      tagline: t("credits.planCircleTagline"),
+      audience: t("credits.planCircleAudience"),
+      unlocks: [
+        t("credits.planCircleUnlock1"),
+        t("credits.planCircleUnlock2"),
+        t("credits.planCircleUnlock3"),
+        t("credits.planCircleUnlock4"),
+      ],
+    },
+  };
 
   async function refresh(): Promise<void> {
     setLoading(true); setErrorLine(null);
@@ -183,8 +199,8 @@ export function CreditsStudio() {
       {/* Tab switcher */}
       <div className="flex gap-2">
         {([
-          { id: "credits", label: "Credits" },
-          { id: "referral", label: "Refer & Earn" },
+          { id: "credits", label: t("credits.tabCredits") },
+          { id: "referral", label: t("credits.tabReferral") },
         ] as const).map(tab => (
           <button
             key={tab.id}
@@ -205,23 +221,23 @@ export function CreditsStudio() {
       {activeTab === "referral" && (
         <div className="grid gap-4">
           <section className="surface-stage rounded-[1.8rem] p-5 sm:p-7">
-            <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>Refer & Earn</p>
+            <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>{t("credits.referralEyebrow")}</p>
             <h1 className="mt-3 leading-tight" style={{ fontFamily: G.display, fontSize: "clamp(2rem,4vw,2.8rem)", color: G.champagne }}>
-              Grow the circle.<br />Earn together.
+              {t("credits.referralHeading")}<br />{t("credits.referralHeadingLine2")}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed" style={{ color: G.muted }}>
-              Share your unique referral link with trusted operators. When they join and get verified, you both earn credits — no cap, no expiry.
+              {t("credits.referralSubtext")}
             </p>
           </section>
 
           {/* Reward structure */}
           <section className="surface-elevated rounded-[1.5rem] p-5">
-            <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>Reward Structure</p>
+            <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>{t("credits.rewardStructure")}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               {[
-                { label: "You earn (Standard)", value: "20 cr", desc: "Per verified referral" },
-                { label: "You earn (VIP)", value: "40 cr", desc: "Double reward for VIP members" },
-                { label: "New member earns", value: "10 cr", desc: "Welcome bonus on signup" },
+                { label: t("credits.earnStandard"), value: "20 cr", desc: t("credits.perVerifiedReferral") },
+                { label: t("credits.earnVip"), value: "40 cr", desc: t("credits.doubleRewardVip") },
+                { label: t("credits.newMemberEarns"), value: "10 cr", desc: t("credits.welcomeBonus") },
               ].map(({ label, value, desc }) => (
                 <div key={label} className="rounded-xl p-4 text-center"
                   style={{ background: "rgba(196,151,58,0.05)", border: "1px solid rgba(196,151,58,0.14)" }}>
@@ -236,12 +252,12 @@ export function CreditsStudio() {
           {/* Referral code — 2-col on desktop */}
           <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
             <section className="surface-elevated rounded-[1.5rem] p-5">
-              <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>Your Referral Link</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>{t("credits.yourReferralLink")}</p>
               {!getSessionToken() && (
-                <p className="text-sm" style={{ color: G.muted }}>Sign in from Workspace to get your personal referral link.</p>
+                <p className="text-sm" style={{ color: G.muted }}>{t("credits.signInForLink")}</p>
               )}
               {getSessionToken() && referralLoading && (
-                <p className="text-sm" style={{ color: G.muted }}>Loading your referral code…</p>
+                <p className="text-sm" style={{ color: G.muted }}>{t("credits.loadingReferral")}</p>
               )}
               {referralError && (
                 <p className="text-sm" style={{ color: "var(--danger)" }}>{referralError}</p>
@@ -251,12 +267,12 @@ export function CreditsStudio() {
                   {referral.isVip && (
                     <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 self-start"
                       style={{ background: "rgba(196,151,58,0.12)", border: "1px solid rgba(196,151,58,0.30)" }}>
-                      <span className="text-xs font-semibold" style={{ color: G.gold }}>✦ VIP — earning 40 cr per referral</span>
+                      <span className="text-xs font-semibold" style={{ color: G.gold }}>{t("credits.vipEarning")}</span>
                     </div>
                   )}
                   <div className="rounded-xl p-4"
                     style={{ background: "rgba(196,151,58,0.06)", border: "1px solid rgba(196,151,58,0.22)" }}>
-                    <p className="text-[10px] uppercase tracking-[0.16em] mb-1" style={{ color: G.muted }}>Your Code</p>
+                    <p className="text-[10px] uppercase tracking-[0.16em] mb-1" style={{ color: G.muted }}>{t("credits.yourCode")}</p>
                     <p className="text-lg font-semibold tracking-widest" style={{ color: G.champagne, fontFamily: G.display }}>{referral.code}</p>
                   </div>
                   <div className="flex items-center gap-3 rounded-xl p-4"
@@ -271,12 +287,12 @@ export function CreditsStudio() {
                         color: copied ? "#9dcf88" : G.gold,
                       }}
                     >
-                      {copied ? "Copied ✓" : "Copy Link"}
+                      {copied ? t("credits.copied") : t("credits.copyLink")}
                     </button>
                   </div>
                   <div className="flex items-center justify-between rounded-xl p-4"
                     style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,151,58,0.08)" }}>
-                    <p className="text-sm" style={{ color: G.muted }}>Total referrals so far</p>
+                    <p className="text-sm" style={{ color: G.muted }}>{t("credits.totalReferrals")}</p>
                     <p className="text-xl font-semibold" style={{ color: G.champagne, fontFamily: G.display }}>{referral.uses}</p>
                   </div>
                 </div>
@@ -285,12 +301,12 @@ export function CreditsStudio() {
 
             {/* How it works — second column on desktop */}
             <section className="surface-elevated rounded-[1.5rem] p-5">
-              <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>How It Works</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>{t("credits.howItWorks")}</p>
               <div className="grid gap-3">
                 {[
-                  { step: "01", title: "Share your link", desc: "Send your unique referral link to trusted founders, operators, and investors in the Balearics." },
-                  { step: "02", title: "They apply & get verified", desc: "Your referral submits their application. Once verified and approved, the reward triggers automatically." },
-                  { step: "03", title: "Both earn credits", desc: "You earn 20 cr (or 40 cr if you're VIP). They receive a 10 cr welcome bonus. No cap, no expiry." },
+                  { step: "01", title: t("credits.step1Title"), desc: t("credits.step1Desc") },
+                  { step: "02", title: t("credits.step2Title"), desc: t("credits.step2Desc") },
+                  { step: "03", title: t("credits.step3Title"), desc: t("credits.step3Desc") },
                 ].map(({ step, title, desc }) => (
                   <div key={step} className="flex gap-3 rounded-xl p-3"
                     style={{ background: "rgba(196,151,58,0.04)", border: "1px solid rgba(196,151,58,0.10)" }}>
@@ -311,12 +327,12 @@ export function CreditsStudio() {
       {activeTab === "credits" && <>
       {/* Header */}
       <section className="surface-stage rounded-[1.8rem] p-5 sm:p-7">
-        <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>Credits Studio</p>
+        <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>{t("credits.creditsEyebrow")}</p>
         <h1 className="mt-3 leading-tight" style={{ fontFamily: G.display, fontSize: "clamp(2rem,4vw,2.8rem)", color: G.champagne }}>
-          Intentional access.<br />Clear value.
+          {t("credits.creditsHeading")}<br />{t("credits.creditsHeadingLine2")}
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed" style={{ color: G.muted }}>
-          Credits are not a paywall. They are a deliberate quality filter that keeps every introduction, conversation, and opportunity high-signal and high-trust. You spend only when you choose to unlock something of real value.
+          {t("credits.creditsSubtext")}
         </p>
 
         {credits && (
@@ -324,14 +340,14 @@ export function CreditsStudio() {
             className="mt-5 inline-flex items-center gap-3 rounded-xl px-5 py-3"
             style={{ background: "rgba(196,151,58,0.08)", border: "1px solid rgba(196,151,58,0.22)" }}
           >
-            <span className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>Current Balance</span>
+            <span className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>{t("credits.currentBalance")}</span>
             <span
               className="font-semibold"
               style={{ fontFamily: G.display, fontSize: "2rem", color: G.champagne, lineHeight: 1 }}
             >
               {credits.balance}
             </span>
-            <span className="text-xs" style={{ color: G.muted }}>credits</span>
+            <span className="text-xs" style={{ color: G.muted }}>{t("credits.creditsUnit")}</span>
           </div>
         )}
 
@@ -341,15 +357,15 @@ export function CreditsStudio() {
 
       {/* Action costs reference */}
       <section className="surface-elevated rounded-[1.5rem] p-5">
-        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>What Credits Unlock</p>
+        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>{t("credits.whatCreditsUnlock")}</p>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           {[
-            { action: "Introduction", cost: ACTION_COSTS.introUnlock },
-            { action: "Open Chat Thread", cost: 12 },
-            { action: "Publish Listing", cost: ACTION_COSTS.listingPublish },
-            { action: "Circle Request", cost: ACTION_COSTS.circleRequest },
-            { action: "AI Request", cost: ACTION_COSTS.aiRequest },
-            { action: "Pitch to VIP", cost: 25 },
+            { action: t("credits.actionIntroduction"), cost: ACTION_COSTS.introUnlock },
+            { action: t("credits.actionOpenChat"), cost: 12 },
+            { action: t("credits.actionPublishListing"), cost: ACTION_COSTS.listingPublish },
+            { action: t("credits.actionCircleRequest"), cost: ACTION_COSTS.circleRequest },
+            { action: t("credits.actionAiRequest"), cost: ACTION_COSTS.aiRequest },
+            { action: t("credits.actionPitchToVip"), cost: 25 },
           ].map(({ action, cost }) => (
             <div
               key={action}
@@ -365,19 +381,19 @@ export function CreditsStudio() {
 
       {/* Planner */}
       <section className="surface-elevated rounded-[1.5rem] p-5">
-        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>Monthly Planner</p>
+        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>{t("credits.monthlyPlanner")}</p>
         <h2 className="mt-1" style={{ fontFamily: G.display, fontSize: "1.6rem", color: G.champagne }}>
-          Estimate your credit rhythm
+          {t("credits.estimateCreditRhythm")}
         </h2>
         <p className="mt-1 text-sm" style={{ color: G.muted }}>
-          Slide to match your expected monthly activity. We recommend the most suitable plan in real time.
+          {t("credits.plannerSubtext")}
         </p>
 
         <div className="mt-4 grid gap-4">
-          <PlannerSlider label="AI requests" count={planAi} min={0} max={16} onChange={setPlanAi} />
-          <PlannerSlider label="Introduction unlocks" count={planIntros} min={0} max={16} onChange={setPlanIntros} />
-          <PlannerSlider label="Marketplace listings" count={planListings} min={0} max={12} onChange={setPlanListings} />
-          <PlannerSlider label="Circle access requests" count={planCircles} min={0} max={8} onChange={setPlanCircles} />
+          <PlannerSlider label={t("credits.sliderAiRequests")} count={planAi} min={0} max={16} onChange={setPlanAi} />
+          <PlannerSlider label={t("credits.sliderIntroductions")} count={planIntros} min={0} max={16} onChange={setPlanIntros} />
+          <PlannerSlider label={t("credits.sliderListings")} count={planListings} min={0} max={12} onChange={setPlanListings} />
+          <PlannerSlider label={t("credits.sliderCircleRequests")} count={planCircles} min={0} max={8} onChange={setPlanCircles} />
         </div>
 
         <div
@@ -386,16 +402,16 @@ export function CreditsStudio() {
         >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.18em]" style={{ color: G.muted }}>Estimated Monthly Credits</p>
+              <p className="text-[10px] uppercase tracking-[0.18em]" style={{ color: G.muted }}>{t("credits.estimatedMonthly")}</p>
               <p className="mt-1 text-3xl font-semibold" style={{ color: G.champagne }}>{estimated}</p>
             </div>
             {recommended && (
               <div className="text-right">
-                <p className="text-[10px] uppercase tracking-[0.14em]" style={{ color: G.gold }}>Best fit</p>
+                <p className="text-[10px] uppercase tracking-[0.14em]" style={{ color: G.gold }}>{t("credits.bestFit")}</p>
                 <p className="mt-1 text-base font-medium" style={{ color: G.champagne }}>
                   {PLAN_FRAMING[recommended.id].subtitle}
                 </p>
-                <p className="text-xs" style={{ color: G.muted }}>{recommended.credits} credits</p>
+                <p className="text-xs" style={{ color: G.muted }}>{recommended.credits} {t("credits.creditsUnit")}</p>
               </div>
             )}
           </div>
@@ -404,9 +420,9 @@ export function CreditsStudio() {
 
       {/* Plans */}
       <section className="surface-elevated rounded-[1.5rem] p-5">
-        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>Access Plans</p>
+        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>{t("credits.accessPlans")}</p>
         <h2 className="mt-1" style={{ fontFamily: G.display, fontSize: "1.6rem", color: G.champagne }}>
-          Choose your access pace
+          {t("credits.chooseYourPace")}
         </h2>
 
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
@@ -427,7 +443,7 @@ export function CreditsStudio() {
                     className="mb-3 self-start rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-[0.16em] font-semibold"
                     style={{ background: "rgba(196,151,58,0.18)", color: G.gold, border: "1px solid rgba(196,151,58,0.35)" }}
                   >
-                    Best fit now
+                    {t("credits.bestFitNow")}
                   </span>
                 )}
                 <p className="text-[10px] uppercase tracking-[0.18em]" style={{ color: G.muted }}>{framing.subtitle}</p>
@@ -438,7 +454,7 @@ export function CreditsStudio() {
                 <div className="my-4" style={{ borderTop: "1px solid rgba(196,151,58,0.12)" }} />
 
                 <p className="text-3xl font-semibold" style={{ color: G.champagne, fontFamily: G.display }}>€{pack.priceEur}</p>
-                <p className="text-sm" style={{ color: G.muted }}>{pack.credits} credits</p>
+                <p className="text-sm" style={{ color: G.muted }}>{pack.credits} {t("credits.creditsUnit")}</p>
 
                 <ul className="mt-3 flex-1 space-y-1.5 text-xs" style={{ color: G.muted }}>
                   {framing.unlocks.map(line => (
@@ -454,7 +470,7 @@ export function CreditsStudio() {
                   disabled={loading || buying === pack.id || !getSessionToken()}
                   className={`${isRecommended ? "btn-primary" : "btn-secondary"} premium-button mt-5 w-full rounded-xl px-4 py-2.5 text-sm disabled:opacity-50`}
                 >
-                  {buying === pack.id ? "Processing…" : `Choose ${framing.subtitle}`}
+                  {buying === pack.id ? t("credits.processing") : `${t("credits.choosePlan")} ${framing.subtitle}`}
                 </button>
               </article>
             );
@@ -464,15 +480,15 @@ export function CreditsStudio() {
 
       {/* Why Credits */}
       <section className="surface-elevated rounded-[1.5rem] p-5">
-        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>The Philosophy</p>
+        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>{t("credits.philosophy")}</p>
         <h2 className="mt-1" style={{ fontFamily: G.display, fontSize: "1.6rem", color: G.champagne }}>
-          Why credits create better outcomes
+          {t("credits.whyCredits")}
         </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           {[
-            { title: "Signal over noise", text: "Credits prevent low-effort outreach. Every action carries weight, which raises the quality of every interaction in the circle." },
-            { title: "Strategic intention", text: "You spend when you choose to unlock a specific, high-value move. Not by default, not by accident." },
-            { title: "Trust as currency", text: "Members who invest intentionally build stronger reputations. The credit system amplifies the signal of serious operators." },
+            { title: t("credits.phil1Title"), text: t("credits.phil1Text") },
+            { title: t("credits.phil2Title"), text: t("credits.phil2Text") },
+            { title: t("credits.phil3Title"), text: t("credits.phil3Text") },
           ].map(({ title, text }) => (
             <div
               key={title}
@@ -489,8 +505,8 @@ export function CreditsStudio() {
 
       {/* Recent Activity */}
       <section className="surface-elevated rounded-[1.5rem] p-5">
-        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>Recent Activity</p>
-        <h2 className="mt-1" style={{ fontFamily: G.display, fontSize: "1.6rem", color: G.champagne }}>Credit timeline</h2>
+        <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: G.muted }}>{t("credits.recentActivity")}</p>
+        <h2 className="mt-1" style={{ fontFamily: G.display, fontSize: "1.6rem", color: G.champagne }}>{t("credits.creditTimeline")}</h2>
         <div className="mt-4 space-y-2">
           {(credits?.transactions ?? []).slice(0, 8).map(tx => (
             <div
@@ -513,10 +529,10 @@ export function CreditsStudio() {
             </div>
           ))}
           {!credits && (
-            <p className="text-sm" style={{ color: G.muted }}>Sign in from Workspace to see your live credit history.</p>
+            <p className="text-sm" style={{ color: G.muted }}>{t("credits.signInForHistory")}</p>
           )}
           {credits && credits.transactions.length === 0 && (
-            <p className="text-sm" style={{ color: G.muted }}>No transactions yet. Your welcome credits will appear here.</p>
+            <p className="text-sm" style={{ color: G.muted }}>{t("credits.noTransactions")}</p>
           )}
         </div>
       </section>
