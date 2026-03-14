@@ -51,6 +51,9 @@ export function TopNav() {
   useEffect(() => { setOpen(false); setUserMenuOpen(false); }, [pathname]);
 
   const [hasAdminSession, setHasAdminSession] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  useEffect(() => { setMoreOpen(false); }, [pathname]);
 
   const loadUser = useCallback(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("balea_session_token") : null;
@@ -205,27 +208,50 @@ export function TopNav() {
 
             <div className="mx-2 h-4 w-px" style={{ background: "rgba(196,151,58,0.20)" }} />
 
-            {extraLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="px-3 py-1.5 text-sm rounded-lg transition-colors"
+            {/* More dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setMoreOpen(v => !v)}
+                className="px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1"
                 style={{
-                  color: active(pathname, item.href) ? "var(--gold)" : "var(--text-secondary)",
-                  fontWeight: active(pathname, item.href) ? 600 : 400,
+                  color: moreOpen ? "var(--champagne)" : "var(--text-secondary)",
+                  background: moreOpen ? "rgba(196,151,58,0.10)" : "transparent",
                 }}
               >
-                {item.label}
-              </Link>
-            ))}
-
-            <a
-              href={`mailto:${supportEmail}`}
-              className="px-3 py-1.5 text-sm rounded-lg transition-colors"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              {t("nav.support")}
-            </a>
+                ···
+              </button>
+              {moreOpen && (
+                <div
+                  className="absolute left-0 top-full mt-2 w-48 rounded-[1rem] p-2 z-50"
+                  style={{
+                    background: "rgba(14,13,11,0.96)",
+                    border: "1px solid rgba(196,151,58,0.20)",
+                    backdropFilter: "blur(20px)",
+                    boxShadow: "0 16px 40px rgba(0,0,0,0.50)",
+                  }}
+                >
+                  {extraLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/5"
+                      style={{ color: active(pathname, item.href) ? "var(--gold)" : "var(--text-secondary)" }}
+                      onClick={() => setMoreOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <a
+                    href={`mailto:${supportEmail}`}
+                    className="flex items-center rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/5"
+                    style={{ color: "var(--text-secondary)" }}
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    {t("nav.support")}
+                  </a>
+                </div>
+              )}
+            </div>
 
             <div className="mx-2 h-4 w-px" style={{ background: "rgba(196,151,58,0.20)" }} />
 
@@ -465,7 +491,7 @@ export function TopNav() {
               {t("nav.support")}
             </a>
             <div className="flex items-center gap-3 rounded-xl px-4 py-2.5">
-              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Language</span>
+              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{t("nav.language")}</span>
               <LangToggle />
             </div>
             {user ? (
