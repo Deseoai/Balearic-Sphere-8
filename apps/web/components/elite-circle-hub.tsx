@@ -399,14 +399,14 @@ export function EliteCircleHub() {
           </div>
         </div>
 
-        {/* Members sidebar */}
+        {/* Members sidebar — desktop */}
         <AnimatePresence>
           {showMembers && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="rounded-[1.5rem] p-5"
+              className="hidden lg:block rounded-[1.5rem] p-5"
               style={{ background: "rgba(10,9,8,0.85)", border: "1px solid rgba(212,168,74,0.14)" }}
             >
               <p className="text-[10px] uppercase tracking-[0.28em] mb-4" style={{ color: "rgba(212,168,74,0.55)" }}>
@@ -444,6 +444,61 @@ export function EliteCircleHub() {
           )}
         </AnimatePresence>
       </section>
+
+      {/* Members drawer — mobile only */}
+      <AnimatePresence>
+        {showMembers && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 z-40"
+              style={{ background: "rgba(0,0,0,0.65)" }}
+              onClick={() => setShowMembers(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="lg:hidden fixed bottom-0 left-0 right-0 z-50 rounded-t-[1.8rem] p-5 pb-8"
+              style={{ background: "#0e0d0b", border: "1px solid rgba(212,168,74,0.22)", maxHeight: "70vh", overflowY: "auto" }}
+            >
+              {/* Handle */}
+              <div className="flex justify-center mb-4">
+                <div className="w-10 h-1 rounded-full" style={{ background: "rgba(212,168,74,0.30)" }} />
+              </div>
+              <p className="text-[10px] uppercase tracking-[0.28em] mb-4" style={{ color: "rgba(212,168,74,0.55)" }}>
+                Elite Members · {members.length}
+              </p>
+              <div className="space-y-3">
+                {members.map(m => (
+                  <div key={m.userId} className="flex items-center gap-3">
+                    <Avatar name={m.displayName ?? m.companyName} avatarUrl={m.avatarUrl} size={40} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate" style={{ color: G.champagne }}>
+                        {m.companyName ?? m.displayName ?? "Elite Member"}
+                      </p>
+                      {m.industry && (
+                        <p className="text-[11px] truncate capitalize" style={{ color: G.muted }}>
+                          {m.industry.replaceAll("_", " ")}
+                        </p>
+                      )}
+                    </div>
+                    <span className="shrink-0 text-xs" style={{ color: "#D4A84A" }}>✦</span>
+                  </div>
+                ))}
+                {members.length === 0 && (
+                  <p className="text-xs" style={{ color: G.muted }}>No elite members yet.</p>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -30,7 +30,9 @@ const envSchema = z.object({
   N8N_WEBHOOK_SECRET: z.string().optional(),
   N8N_TIMEOUT_MS: z.coerce.number().default(8000),
   STRIPE_SECRET_KEY: z.string().optional(),
-  STRIPE_WEBHOOK_SECRET: z.string().optional()
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().default("gpt-4o-mini")
 });
 
 const parsed = envSchema.parse(process.env);

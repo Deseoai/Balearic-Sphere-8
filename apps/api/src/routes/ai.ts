@@ -1,6 +1,7 @@
 import { AiPromptTypes } from "@mallorca/shared";
 import type { FastifyInstance } from "fastify";
 import { randomUUID } from "node:crypto";
+import OpenAI from "openai";
 import { z } from "zod";
 import { env } from "../config.js";
 import { requireMemberWorkspaceAccess, requireSession } from "../lib/authSession.js";
@@ -158,45 +159,35 @@ async function callSupportWebhook(input: {
   }
 }
 
-async function callAiToolsWebhook(input: {
-  userId: string;
-  email: string;
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI | null {
+  if (!env.OPENAI_API_KEY) return null;
+  if (!_openai) _openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+  return _openai;
+}
+
+async function callOpenAI(input: {
   message: string;
   context: string;
 }): Promise<{ answer: string; suggestions: string[] } | null> {
-  const url = env.N8N_AI_TOOLS_WEBHOOK_URL ?? env.N8N_SUPPORT_WEBHOOK_URL;
-  if (!url) return null;
-
-  const payload = {
-    data: {
-      userId: input.userId,
-      userEmail: input.email,
-      message: input.message,
-      context: input.context,
-    }
-  };
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), env.N8N_TIMEOUT_MS);
+  const client = getOpenAI();
+  if (!client) return null;
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: controller.signal
+    const completion = await client.chat.completions.create({
+      model: env.OPENAI_MODEL,
+      messages: [
+        { role: "system", content: input.context },
+        { role: "user", content: input.message },
+      ],
+      max_tokens: 900,
+      temperature: 0.7,
     });
-    if (!response.ok) return null;
-    const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-    const answer =
-      (typeof body.answer === "string" && body.answer.trim()) ||
-      (typeof body.response === "string" && body.response.trim()) ||
-      "";
+    const answer = completion.choices[0]?.message?.content?.trim() ?? "";
     if (!answer) return null;
     return { answer, suggestions: [] };
-  } catch {
+  } catch (err) {
+    console.error("[AI Tools] OpenAI error:", err);
     return null;
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
@@ -395,13 +386,11 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
     });
 
     const aiResult = await Promise.race([
-      callAiToolsWebhook({
-        userId: session.userId,
-        email: session.email,
+      callOpenAI({
         message: richPayload.message,
         context: richPayload.context,
       }),
-      new Promise<null>(resolve => setTimeout(() => resolve(null), 15000)),
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 25000)),
     ]);
 
     let finalStatus: "completed" | "queued" = "queued";
@@ -412,7 +401,7 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
       await completeAiRequest({
         id: created.id,
         responseSummary,
-        model: "n8n-claude",
+        model: env.OPENAI_MODEL,
         completedAt: new Date().toISOString(),
       });
       finalStatus = "completed";
