@@ -19,7 +19,12 @@ const sans = Manrope({
 export const metadata: Metadata = {
   title: "Balea Sphere",
   description:
-    "A curated AI-powered access network for Mallorca and the Balearic business ecosystem."
+    "A curated AI-powered access network for Mallorca and the Balearic business ecosystem.",
+  icons: {
+    icon: "/logo_balear.png",
+    apple: "/logo_balear.png",
+    shortcut: "/logo_balear.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
