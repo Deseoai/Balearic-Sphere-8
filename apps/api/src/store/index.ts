@@ -248,6 +248,10 @@ export async function listChatMessages(input: {
   return usePostgres ? postgres.listChatMessages(input) : memory.listChatMessages(input);
 }
 
+export async function countUnreadMessages(userId: string, since: string): Promise<number> {
+  return usePostgres ? postgres.countUnreadMessages(userId, since) : Promise.resolve(0);
+}
+
 export async function hasProcessedWebhookKey(key: string): Promise<boolean> {
   return usePostgres ? postgres.hasProcessedWebhookKey(key) : memory.hasProcessedWebhookKey(key);
 }

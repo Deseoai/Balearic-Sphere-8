@@ -147,6 +147,10 @@
     "submitNote": "Applications are reviewed within 24–48 hours. You will receive a direct response by email.",
     "successTitle": "Application Received",
     "successReviewNote": "Our curation team reviews all applications within 24–48 hours. You will receive a decision by email.",
+    "checkEmailTitle": "Please check your inbox",
+    "checkEmailBody": "We have sent a confirmation to your email address. Our team will be in touch within 24–48 hours.",
+    "checkSpamHint": "Can't find it? Check your spam or junk folder — our emails occasionally land there.",
+    "successGotIt": "Got it — close",
     "reference": "Reference:",
     "suggestedLevel": "Suggested level:"
   },

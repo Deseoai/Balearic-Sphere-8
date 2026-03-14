@@ -1225,6 +1225,22 @@ export async function listChatMessages(input: {
   return result.rows.map((row) => mapChatMessage(row));
 }
 
+export async function countUnreadMessages(userId: string, since: string): Promise<number> {
+  const db = getPool();
+  const result = await db.query(
+    `
+      select count(*)::int as count
+      from app_chat_messages m
+      join app_chat_threads t on t.id = m.thread_id
+      where (t.participant_a = $1 or t.participant_b = $1)
+        and m.sender_user_id != $1
+        and m.created_at > $2
+    `,
+    [userId, since]
+  );
+  return result.rows[0]?.count ?? 0;
+}
+
 export async function hasProcessedWebhookKey(key: string): Promise<boolean> {
   const db = getPool();
   const result = await db.query(

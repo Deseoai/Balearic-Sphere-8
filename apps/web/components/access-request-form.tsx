@@ -117,31 +117,74 @@ export function AccessRequestForm() {
     }
   }
 
-  /* ── Success ─────────────────────────────────────────────── */
-  if (state.type === "success") {
-    return (
+  /* ── Success Modal ───────────────────────────────────────── */
+  const [modalOpen, setModalOpen] = useState(state.type === "success");
+  // Sync modal open state when success arrives
+  if (state.type === "success" && !modalOpen) {
+    setModalOpen(true);
+  }
+
+  const successModal = state.type === "success" && modalOpen && (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(12,11,9,0.80)", backdropFilter: "blur(8px)" }}
+      onClick={() => setModalOpen(false)}
+    >
       <div
-        className="rounded-[1.6rem] p-8 sm:p-12 text-center"
-        style={{ background: "rgba(196,151,58,0.05)", border: "1px solid rgba(196,151,58,0.22)" }}
+        className="relative w-full max-w-md rounded-[1.8rem] p-8 sm:p-10 text-center"
+        style={{
+          background: "rgba(20,18,16,0.98)",
+          border: "1px solid rgba(196,151,58,0.30)",
+          boxShadow: "0 32px 80px rgba(0,0,0,0.70)",
+        }}
+        onClick={e => e.stopPropagation()}
       >
-        <div
-          className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
-          style={{ background: "rgba(196,151,58,0.12)", border: "1px solid rgba(196,151,58,0.35)" }}
+        {/* Close */}
+        <button
+          onClick={() => setModalOpen(false)}
+          className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full text-sm transition-colors hover:bg-white/10"
+          style={{ color: G.muted }}
         >
-          <span style={{ color: G.gold, fontSize: "1.5rem" }}>✓</span>
+          ✕
+        </button>
+
+        {/* Icon */}
+        <div
+          className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full"
+          style={{ background: "rgba(196,151,58,0.12)", border: "1px solid rgba(196,151,58,0.40)" }}
+        >
+          <span style={{ color: G.gold, fontSize: "1.7rem" }}>✓</span>
         </div>
+
         <h3
-          className="text-2xl sm:text-3xl"
+          className="text-2xl sm:text-3xl mb-3"
           style={{ fontFamily: G.display, color: G.champagne, lineHeight: 1.1 }}
         >
           {t("applyForm.successTitle")}
         </h3>
-        <p className="mt-4 text-sm leading-relaxed" style={{ color: G.muted }}>
+
+        <p className="text-sm leading-relaxed mb-5" style={{ color: G.muted }}>
           {state.message}
         </p>
+
+        {/* Email reminder */}
         <div
-          className="mx-auto mt-6 flex flex-wrap justify-center gap-6 rounded-xl p-4 text-xs"
-          style={{ background: "rgba(255,248,235,0.025)", border: "1px solid rgba(196,151,58,0.12)", maxWidth: "400px" }}
+          className="rounded-xl px-5 py-4 text-sm leading-relaxed mb-5"
+          style={{ background: "rgba(196,151,58,0.06)", border: "1px solid rgba(196,151,58,0.20)" }}
+        >
+          <p className="font-semibold mb-1" style={{ color: G.champagne }}>
+            📬 {t("applyForm.checkEmailTitle")}
+          </p>
+          <p style={{ color: G.muted }}>{t("applyForm.checkEmailBody")}</p>
+          <p className="mt-2 text-xs" style={{ color: "rgba(196,151,58,0.65)" }}>
+            {t("applyForm.checkSpamHint")}
+          </p>
+        </div>
+
+        {/* Reference */}
+        <div
+          className="flex flex-wrap justify-center gap-4 rounded-xl p-3 text-xs mb-6"
+          style={{ background: "rgba(255,248,235,0.02)", border: "1px solid rgba(196,151,58,0.10)" }}
         >
           <span style={{ color: G.muted }}>
             {t("applyForm.reference")}{" "}
@@ -149,22 +192,22 @@ export function AccessRequestForm() {
               {state.applicantId.slice(0, 12)}…
             </span>
           </span>
-          <span style={{ color: G.muted }}>
-            {t("applyForm.suggestedLevel")}{" "}
-            <span className="font-medium capitalize" style={{ color: G.champagne }}>
-              {state.level.replaceAll("_", " ")}
-            </span>
-          </span>
         </div>
-        <p className="mt-6 text-sm leading-relaxed" style={{ color: G.muted }}>
-          {t("applyForm.successReviewNote")}
-        </p>
+
+        <button
+          onClick={() => setModalOpen(false)}
+          className="btn-primary premium-button w-full rounded-xl px-5 py-3 text-sm"
+        >
+          {t("applyForm.successGotIt")}
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
 
   /* ── Form ─────────────────────────────────────────────────── */
   return (
+    <>
+    {successModal}
     <div className="grid gap-6">
 
       {/* Prestige intro */}
@@ -373,6 +416,7 @@ export function AccessRequestForm() {
         </p>
       </form>
     </div>
+    </>
   );
 }
 

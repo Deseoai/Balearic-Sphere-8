@@ -7,6 +7,7 @@ import { hasMemberWorkspaceAccess, requireMemberWorkspaceAccess, requireSession 
 import { emitEmailAlert, emitEventHub } from "../lib/n8nEvents.js";
 import {
   addCreditTransaction,
+  countUnreadMessages,
   getChatThreadById,
   getDirectChatThreadByUsers,
   getUserByEmail,
@@ -59,7 +60,25 @@ function peerUserIdFor(thread: ChatThreadRecord, userId: string): string {
   return thread.participantA === userId ? thread.participantB : thread.participantA;
 }
 
+const unreadQuerySchema = z.object({
+  since: z.string().datetime().optional()
+});
+
 export async function registerChatRoutes(app: FastifyInstance): Promise<void> {
+  app.get("/v1/chat/unread-count", async (request, reply) => {
+    const session = await requireSession(request, reply);
+    if (!session) return;
+
+    const parsed = unreadQuerySchema.safeParse(request.query ?? {});
+    if (!parsed.success) {
+      return reply.status(400).send({ error: "invalid_query" });
+    }
+
+    const since = parsed.data.since ?? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const count = await countUnreadMessages(session.userId, since);
+    return reply.send({ count });
+  });
+
   app.get("/v1/chat/threads", async (request, reply) => {
     const session = await requireSession(request, reply);
     if (!session) return;

@@ -106,7 +106,10 @@ export function MemberMessages() {
     } finally { if (!silent) setBusy(false); }
   }
 
-  useEffect(() => { void refreshThreads(); }, [initialThreadFromUrl]);
+  useEffect(() => {
+    localStorage.setItem("bs_messages_last_seen", new Date().toISOString());
+    void refreshThreads();
+  }, [initialThreadFromUrl]);
 
   useEffect(() => {
     if (!selectedThreadId || !me) { setMessages([]); return; }

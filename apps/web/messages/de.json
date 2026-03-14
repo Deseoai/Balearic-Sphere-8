@@ -147,6 +147,10 @@
     "submitNote": "Bewerbungen werden innerhalb von 24–48 Stunden geprüft. Sie erhalten eine direkte Antwort per E-Mail.",
     "successTitle": "Bewerbung eingegangen",
     "successReviewNote": "Unser Kurations-Team prüft alle Bewerbungen innerhalb von 24–48 Stunden. Sie erhalten eine Entscheidung per E-Mail.",
+    "checkEmailTitle": "Bitte überprüfen Sie Ihr Postfach",
+    "checkEmailBody": "Wir haben eine Bestätigung an Ihre E-Mail-Adresse gesendet. Unser Team meldet sich innerhalb von 24–48 Stunden.",
+    "checkSpamHint": "Nichts gefunden? Schauen Sie bitte auch in Ihrem Spam- oder Junk-Ordner nach.",
+    "successGotIt": "Verstanden — schließen",
     "reference": "Referenz:",
     "suggestedLevel": "Empfohlenes Level:"
   },

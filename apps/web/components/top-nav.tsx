@@ -44,6 +44,7 @@ export function TopNav() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   const isAdmin = user ? ADMIN_ROLES.includes(user.role) : false;
   const isAdminOnly = user?.userId === "admin";
@@ -83,6 +84,27 @@ export function TopNav() {
   }, []);
 
   useEffect(() => { loadUser(); }, [loadUser]);
+
+  useEffect(() => {
+    if (!user || user.userId === "admin") return;
+    const token = typeof window !== "undefined" ? localStorage.getItem("balea_session_token") : null;
+    if (!token) return;
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+
+    function fetchUnread() {
+      const since = localStorage.getItem("bs_messages_last_seen") ?? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      fetch(`${base}/v1/chat/unread-count?since=${encodeURIComponent(since)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(r => r.ok ? r.json() as Promise<{ count: number }> : null)
+        .then(d => { if (d) setUnreadMessages(d.count); })
+        .catch(() => {});
+    }
+
+    fetchUnread();
+    const timer = window.setInterval(fetchUnread, 45_000);
+    return () => window.clearInterval(timer);
+  }, [user]);
 
   const handleLogout = useCallback(async () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("balea_session_token") : null;
@@ -195,7 +217,7 @@ export function TopNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-2.5 py-1.5 text-sm rounded-lg transition-colors"
+                className="relative px-2.5 py-1.5 text-sm rounded-lg transition-colors"
                 style={{
                   color: active(pathname, item.href) ? "var(--champagne)" : "var(--text-secondary)",
                   background: active(pathname, item.href) ? "rgba(196,151,58,0.10)" : "transparent",
@@ -203,6 +225,14 @@ export function TopNav() {
                 }}
               >
                 {item.label}
+                {item.href === "/messages" && unreadMessages > 0 && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold"
+                    style={{ background: "#E53E3E", color: "#fff", lineHeight: 1 }}
+                  >
+                    {unreadMessages > 9 ? "9+" : unreadMessages}
+                  </span>
+                )}
               </Link>
             ))}
 
@@ -528,7 +558,7 @@ export function TopNav() {
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-xl px-1 py-2 text-center text-[9px] transition-colors"
+            className="relative rounded-xl px-1 py-2 text-center text-[9px] transition-colors"
             style={{
               color: active(pathname, item.href) ? "var(--champagne)" : "var(--text-secondary)",
               background: active(pathname, item.href) ? "rgba(196,151,58,0.10)" : "transparent",
@@ -537,6 +567,14 @@ export function TopNav() {
             }}
           >
             {item.mobile}
+            {item.href === "/messages" && unreadMessages > 0 && (
+              <span
+                className="absolute top-1 right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-0.5 text-[8px] font-bold"
+                style={{ background: "#E53E3E", color: "#fff", lineHeight: 1 }}
+              >
+                {unreadMessages > 9 ? "9+" : unreadMessages}
+              </span>
+            )}
           </Link>
         ))}
       </nav>
