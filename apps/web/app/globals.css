@@ -120,7 +120,7 @@ main { position: relative; }
 
 /* ── Buttons ─────────────────────────────────────────────────── */
 .premium-button {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
@@ -377,6 +377,14 @@ main { position: relative; }
 /* ── AI Rail offset ──────────────────────────────────────────── */
 @media (max-width: 1023px) { .lg\:with-ai-rail { padding-right: 0; } }
 @media (min-width: 1024px) { .lg\:with-ai-rail { padding-right: 344px; } }
+
+/* The sticky top-nav header should always span the full app-shell width,
+   ignoring the ai-rail right padding — so nav links never escape the frame */
+@media (min-width: 1024px) {
+  .lg\:with-ai-rail > header {
+    width: calc(100% + 344px);
+  }
+}
 
 /* ── Luxury Divider ──────────────────────────────────────────── */
 .divider-gold {

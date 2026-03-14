@@ -98,6 +98,12 @@ export function ProfileSettings() {
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
+  // Account deletion
+  const [showDeletePanel, setShowDeletePanel] = useState(false);
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const hasAdminSession = typeof window !== "undefined" && !!localStorage.getItem("balea_admin_session");
 
   const loadUser = useCallback(async () => {
@@ -178,6 +184,29 @@ export function ProfileSettings() {
     } finally {
       setSendingMagicLink(false);
     }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmEmail.trim().toLowerCase() !== user?.email.toLowerCase()) {
+      setDeleteError("Email does not match your account email.");
+      return;
+    }
+    setDeleting(true); setDeleteError(null);
+    const token = getSessionToken();
+    const res = await fetch(`${apiBaseUrl}/v1/auth/me`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ confirmEmail: deleteConfirmEmail.trim() }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ message: "Deletion failed." })) as { message?: string };
+      setDeleteError(body.message ?? "Could not delete account. Please contact support.");
+      setDeleting(false);
+      return;
+    }
+    localStorage.removeItem("balea_session_token");
+    localStorage.removeItem("balea_admin_session");
+    window.location.href = "/?deleted=1";
   };
 
   const handleLogout = async () => {
@@ -366,6 +395,68 @@ export function ProfileSettings() {
             {saving ? "Saving…" : "Save Changes"}
           </button>
         </div>
+      </section>
+
+      {/* Data & Privacy */}
+      <section className="surface-elevated rounded-[1.8rem] p-6 sm:p-8">
+        <p className="text-[10px] uppercase tracking-[0.28em] mb-1" style={{ color: G.muted }}>Data &amp; Privacy</p>
+        <p className="text-xs mb-5" style={{ color: G.muted }}>
+          You have the right to access, correct, or permanently delete your personal data at any time under GDPR Article 17.
+        </p>
+        <a
+          href="#data-protection"
+          className="text-xs underline"
+          style={{ color: G.gold }}
+        >
+          View Privacy &amp; Data Protection Policy ↓
+        </a>
+
+        {!showDeletePanel ? (
+          <div className="mt-5">
+            <button
+              onClick={() => setShowDeletePanel(true)}
+              className="rounded-xl px-5 py-2.5 text-xs"
+              style={{ border: "1px solid rgba(201,123,110,0.30)", color: "#E8A898", background: "rgba(201,123,110,0.04)" }}
+            >
+              Delete My Account
+            </button>
+            <p className="mt-2 text-[11px]" style={{ color: G.muted }}>
+              Permanently removes all your data from Balea Sphere. This action cannot be undone.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-5 rounded-xl p-5" style={{ background: "rgba(201,123,110,0.06)", border: "1px solid rgba(201,123,110,0.22)" }}>
+            <p className="text-sm font-semibold mb-1" style={{ color: "#E8B4BC" }}>Confirm Account Deletion</p>
+            <p className="text-xs mb-4" style={{ color: G.muted }}>
+              This permanently deletes your profile, credits, messages, and all associated data. The deletion is logged for GDPR compliance. Type your email address to confirm.
+            </p>
+            <input
+              type="email"
+              value={deleteConfirmEmail}
+              onChange={e => setDeleteConfirmEmail(e.target.value)}
+              placeholder={user?.email ?? "your@email.com"}
+              className="field-control mb-3"
+            />
+            {deleteError && <p className="mb-3 text-xs" style={{ color: "var(--danger)" }}>{deleteError}</p>}
+            <div className="flex gap-3 flex-wrap">
+              <button
+                onClick={() => void handleDeleteAccount()}
+                disabled={deleting || !deleteConfirmEmail.trim()}
+                className="rounded-xl px-5 py-2.5 text-xs disabled:opacity-50"
+                style={{ background: "rgba(201,123,110,0.15)", border: "1px solid rgba(201,123,110,0.45)", color: "#E8A898" }}
+              >
+                {deleting ? "Deleting…" : "Permanently Delete My Account"}
+              </button>
+              <button
+                onClick={() => { setShowDeletePanel(false); setDeleteConfirmEmail(""); setDeleteError(null); }}
+                className="rounded-xl px-5 py-2.5 text-xs"
+                style={{ border: "1px solid rgba(196,151,58,0.20)", color: G.muted }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Session & Security */}

@@ -2264,3 +2264,8 @@ export async function listEliteMessages(limit = 100): Promise<Array<{ id: string
     createdAt: toIso(r.created_at),
   }));
 }
+
+export async function deleteEliteMessagesBefore(cutoffIso: string): Promise<void> {
+  const db = getPool();
+  await db.query(`delete from app_elite_messages where created_at < $1::timestamptz`, [cutoffIso]);
+}

@@ -8,6 +8,7 @@ const supportEmail = "management@balea-sphere8.com";
 const ADMIN_ROLES = ["admin", "super_admin", "moderator"];
 
 const mainLinks = [
+  { href: "/",           label: "Home",      mobile: "Home" },
   { href: "/workspace",  label: "Workspace", mobile: "Space" },
   { href: "/network",    label: "Network",   mobile: "Map" },
   { href: "/messages",   label: "Messages",  mobile: "Chat" },
@@ -280,6 +281,14 @@ export function TopNav() {
                       VIP
                     </span>
                   )}
+                  {user.isElite && !isAdmin && (
+                    <span
+                      className="rounded px-1.5 py-0.5 text-[9px] font-bold tracking-wide"
+                      style={{ background: "rgba(212,168,74,0.20)", color: "#D4A84A", border: "1px solid rgba(212,168,74,0.45)" }}
+                    >
+                      ✦
+                    </span>
+                  )}
                   <span className="text-[10px]" style={{ color: "var(--text-secondary)" }}>&#9662;</span>
                 </button>
 
@@ -329,6 +338,16 @@ export function TopNav() {
                         >
                           My Workspace
                         </Link>
+                        {isElite && (
+                          <Link
+                            href="/circle"
+                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/5"
+                            style={{ color: "#D4A84A" }}
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            ✦ Inner Circle
+                          </Link>
+                        )}
                       </>
                     )}
                     <div className="h-px my-1" style={{ background: "rgba(196,151,58,0.12)" }} />
@@ -411,6 +430,7 @@ export function TopNav() {
                     {user.displayName || "Member"}
                     {isAdmin && <span className="ml-2 text-[9px] uppercase tracking-wide" style={{ color: "#E8A898" }}>Admin</span>}
                     {user.isVip && !isAdmin && <span className="ml-2 text-[9px] uppercase tracking-wide" style={{ color: "var(--gold)" }}>VIP</span>}
+                    {isElite && !isAdmin && <span className="ml-2 text-[9px] tracking-wide" style={{ color: "#D4A84A" }}>✦</span>}
                   </p>
                   <p className="text-[11px] truncate mt-0.5" style={{ color: "var(--text-secondary)" }}>{user.email}</p>
                 </div>
@@ -461,7 +481,7 @@ export function TopNav() {
 
       {/* ── Mobile Bottom Nav ─────────────────────────────────── */}
       <nav
-        className="fixed bottom-3 left-3 right-3 z-40 grid grid-cols-6 gap-0.5 rounded-[1rem] px-1 py-1.5 lg:hidden"
+        className="fixed bottom-3 left-3 right-3 z-40 grid grid-cols-7 gap-0.5 rounded-[1rem] px-1 py-1.5 lg:hidden"
         style={{
           background: "rgba(14, 13, 11, 0.88)",
           border: "1px solid rgba(196,151,58,0.15)",
@@ -472,7 +492,7 @@ export function TopNav() {
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-xl px-1 py-2 text-center text-[10px] transition-colors"
+            className="rounded-xl px-1 py-2 text-center text-[9px] transition-colors"
             style={{
               color: active(pathname, item.href) ? "var(--champagne)" : "var(--text-secondary)",
               background: active(pathname, item.href) ? "rgba(196,151,58,0.10)" : "transparent",

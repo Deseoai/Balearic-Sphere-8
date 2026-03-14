@@ -2,7 +2,7 @@
 
 import type { ApplicantCategory, IndustrySector } from "@mallorca/shared";
 import { ApplicantCategories, IndustrySectors } from "@mallorca/shared";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { postJson } from "../lib/api";
 
 const revenueOptions = [
@@ -19,21 +19,36 @@ const categories: Array<{ value: ApplicantCategory; label: string }> = Applicant
 }));
 
 const industryLabels: Record<IndustrySector, string> = {
-  technology:   "Technology & Software",
-  real_estate:  "Real Estate & Property",
-  hospitality:  "Hospitality & Tourism",
-  finance:      "Finance & Banking",
-  investment:   "Investment & Capital",
-  fashion:      "Fashion & Luxury",
-  yachting:     "Yachting & Marine",
-  arts:         "Arts & Culture",
-  wellness:     "Wellness & Health",
-  consulting:   "Consulting & Advisory",
-  legal:        "Legal & Compliance",
-  media:        "Media & Communications",
-  food_beverage:"Food & Beverage",
-  events:       "Events & Entertainment",
-  other:        "Other",
+  technology:        "Technology & Software",
+  real_estate:       "Real Estate & Property",
+  hospitality:       "Hospitality & Tourism",
+  finance:           "Finance & Banking",
+  investment:        "Investment & Capital",
+  fashion:           "Fashion & Luxury",
+  yachting:          "Yachting & Marine",
+  arts:              "Arts & Culture",
+  wellness:          "Wellness & Health",
+  consulting:        "Consulting & Advisory",
+  legal:             "Legal & Compliance",
+  media:             "Media & Communications",
+  food_beverage:     "Food & Beverage",
+  events:            "Events & Entertainment",
+  jewelry:           "Jewellery & Watches",
+  luxury_goods:      "Luxury Goods & Retail",
+  aviation:          "Aviation & Private Jets",
+  architecture:      "Architecture & Design",
+  interior_design:   "Interior Design",
+  construction:      "Construction & Development",
+  sports:            "Sports & Recreation",
+  education:         "Education & Training",
+  healthcare:        "Healthcare & Life Sciences",
+  agriculture:       "Agriculture & Food Production",
+  crypto_blockchain: "Crypto & Blockchain",
+  sustainability:    "Sustainability & Clean Energy",
+  photography_film:  "Photography & Film",
+  retail:            "Retail & E-Commerce",
+  logistics:         "Logistics & Supply Chain",
+  other:             "Other",
 };
 
 type SubmitState =
@@ -61,10 +76,15 @@ const G = {
 
 export function AccessRequestForm() {
   const [state, setState] = useState<SubmitState>({ type: "idle" });
+  const [consentChecked, setConsentChecked] = useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
+    if (!consentChecked) {
+      setState({ type: "error", message: "Please agree to the data processing terms to submit your application." });
+      return;
+    }
     const form = formRef.current;
     if (!form) return;
     const fd = new FormData(form);
@@ -83,6 +103,7 @@ export function AccessRequestForm() {
       website:       String(fd.get("website") || ""),
       linkedin:      String(fd.get("linkedin") || "") || undefined,
       instagram:     String(fd.get("instagram") || "") || undefined,
+      consentGiven:  true as const,
     };
     setState({ type: "submitting" });
     try {
@@ -293,6 +314,33 @@ export function AccessRequestForm() {
           </p>
         </div>
 
+        {/* Consent */}
+        <label className="flex items-start gap-3 cursor-pointer">
+          <div className="relative shrink-0 mt-0.5">
+            <input
+              type="checkbox"
+              checked={consentChecked}
+              onChange={e => setConsentChecked(e.target.checked)}
+              className="sr-only"
+            />
+            <div
+              onClick={() => setConsentChecked(c => !c)}
+              className="h-5 w-5 rounded flex items-center justify-center transition-colors"
+              style={{
+                background: consentChecked ? "rgba(196,151,58,0.25)" : "rgba(255,248,235,0.04)",
+                border: `1.5px solid ${consentChecked ? "rgba(196,151,58,0.70)" : "rgba(196,151,58,0.25)"}`,
+              }}
+            >
+              {consentChecked && <span style={{ color: "var(--gold)", fontSize: "0.7rem", lineHeight: 1 }}>✓</span>}
+            </div>
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: G.muted }}>
+            I agree that Balea Sphere stores and processes my personal data for membership administration and network facilitation purposes, in accordance with the{" "}
+            <a href="#data-protection" className="underline" style={{ color: G.gold }}>Privacy &amp; Data Protection Policy</a>.
+            I understand I can request deletion of my data at any time via my account settings.
+          </p>
+        </label>
+
         {/* Error */}
         {state.type === "error" && (
           <div
@@ -306,7 +354,7 @@ export function AccessRequestForm() {
         {/* Submit */}
         <button
           type="submit"
-          disabled={state.type === "submitting"}
+          disabled={state.type === "submitting" || !consentChecked}
           className="btn-primary premium-button w-full rounded-xl px-5 py-4 text-sm disabled:opacity-50"
         >
           {state.type === "submitting" ? "Submitting your application…" : "Submit Application for Review"}

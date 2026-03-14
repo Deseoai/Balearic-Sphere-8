@@ -25,6 +25,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.20.0
+      stripe:
+        specifier: ^20.4.1
+        version: 20.4.1(@types/node@22.19.15)
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -1041,6 +1044,15 @@ packages:
     resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
     engines: {node: '>= 10.x'}
 
+  stripe@20.4.1:
+    resolution: {integrity: sha512-axCguHItc8Sxt0HC6aSkdVRPffjYPV7EQqZRb2GkIa8FzWDycE7nHJM19C6xAIynH1Qp1/BHiopSi96jGBxT0w==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@types/node': '>=16'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   styled-jsx@5.1.6:
     resolution: {integrity: sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==}
     engines: {node: '>= 12.0.0'}
@@ -1944,6 +1956,10 @@ snapshots:
   source-map-js@1.2.1: {}
 
   split2@4.2.0: {}
+
+  stripe@20.4.1(@types/node@22.19.15):
+    optionalDependencies:
+      '@types/node': 22.19.15
 
   styled-jsx@5.1.6(react@19.2.4):
     dependencies:

@@ -501,3 +501,7 @@ export async function saveEliteMessage(msg: { id: string; userId: string; displa
 export async function listEliteMessages(limit?: number): Promise<Array<{ id: string; userId: string; displayName?: string; avatarUrl?: string; content: string; createdAt: string }>> {
   return usePostgres ? postgres.listEliteMessages(limit) : Promise.resolve([]);
 }
+
+export async function deleteEliteMessagesBefore(cutoffIso: string): Promise<void> {
+  return usePostgres ? postgres.deleteEliteMessagesBefore(cutoffIso) : Promise.resolve();
+}

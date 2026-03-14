@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { AiConciergeShell } from "../components/ai-concierge-shell";
+import { PrivacyFooter } from "../components/privacy-footer";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${display.variable} ${sans.variable}`}>
       <body className="font-[var(--font-sans)] antialiased">
         {children}
+        <PrivacyFooter />
         <AiConciergeShell />
       </body>
     </html>

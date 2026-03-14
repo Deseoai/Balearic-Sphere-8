@@ -13,6 +13,21 @@ export const IndustrySectors = [
   "media",
   "food_beverage",
   "events",
+  "jewelry",
+  "luxury_goods",
+  "aviation",
+  "architecture",
+  "interior_design",
+  "construction",
+  "sports",
+  "education",
+  "healthcare",
+  "agriculture",
+  "crypto_blockchain",
+  "sustainability",
+  "photography_film",
+  "retail",
+  "logistics",
   "other"
 ] as const;
 export type IndustrySector = (typeof IndustrySectors)[number];

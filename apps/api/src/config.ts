@@ -25,9 +25,12 @@ const envSchema = z.object({
   N8N_HITL_UPGRADE_WEBHOOK_URL: z.string().url().optional(),
   N8N_EMAIL_ALERT_WEBHOOK_URL: z.string().url().optional(),
   N8N_SUPPORT_WEBHOOK_URL: z.string().url().optional(),
+  N8N_AI_TOOLS_WEBHOOK_URL: z.string().url().optional(),
   N8N_REWARDS_WEBHOOK_URL: z.string().url().optional(),
   N8N_WEBHOOK_SECRET: z.string().optional(),
-  N8N_TIMEOUT_MS: z.coerce.number().default(8000)
+  N8N_TIMEOUT_MS: z.coerce.number().default(8000),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional()
 });
 
 const parsed = envSchema.parse(process.env);

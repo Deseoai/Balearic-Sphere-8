@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { getJson, getSessionToken, postJson } from "../lib/api";
 
 type CreditPackage = { id: "starter" | "growth" | "circle"; label: string; credits: number; priceEur: number; };
@@ -65,7 +66,13 @@ function estimateFromPlanner(input: { ai: number; intros: number; listings: numb
   );
 }
 
+type ReferralCode = { code: string; uses: number; rewardPerUse: number; isVip: boolean; referralUrl: string; };
+
 export function CreditsStudio() {
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<"credits" | "referral">(() =>
+    searchParams?.get("tab") === "referral" ? "referral" : "credits"
+  );
   const [loading, setLoading]     = useState(true);
   const [statusLine, setStatusLine] = useState("Loading plans…");
   const [errorLine, setErrorLine] = useState<string | null>(null);
@@ -77,6 +84,12 @@ export function CreditsStudio() {
   const [planIntros, setPlanIntros]     = useState(2);
   const [planListings, setPlanListings] = useState(1);
   const [planCircles, setPlanCircles]   = useState(1);
+
+  const [referral, setReferral]         = useState<ReferralCode | null>(null);
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [referralError, setReferralError] = useState<string | null>(null);
+  const [copied, setCopied]             = useState(false);
+  const confirmedRef = useRef(false);
 
   async function refresh(): Promise<void> {
     setLoading(true); setErrorLine(null);
@@ -96,6 +109,50 @@ export function CreditsStudio() {
 
   useEffect(() => { void refresh(); }, []);
 
+  // Handle Stripe redirect back to this page
+  useEffect(() => {
+    if (confirmedRef.current) return;
+    const status = searchParams?.get("status");
+    const sessionId = searchParams?.get("session_id");
+    const pkg = searchParams?.get("pkg");
+    if (status === "success" && sessionId && getSessionToken()) {
+      confirmedRef.current = true;
+      void (async () => {
+        try {
+          await postJson("/v1/credits/confirm-checkout", { sessionId }, { auth: true });
+          setStatusLine(`Payment confirmed. ${pkg ? `${pkg.charAt(0).toUpperCase() + pkg.slice(1)} credits` : "Credits"} have been added to your account.`);
+          await refresh();
+        } catch {
+          setStatusLine("Payment received. Credits will appear shortly — refresh if needed.");
+        }
+      })();
+    } else if (status === "cancelled") {
+      setStatusLine("Payment cancelled. Choose a plan when you're ready.");
+    }
+  }, []);
+
+  async function loadReferral(): Promise<void> {
+    if (!getSessionToken()) return;
+    setReferralLoading(true); setReferralError(null);
+    try {
+      const res = await getJson<ReferralCode>("/v1/referrals/my-code", { auth: true });
+      setReferral(res);
+    } catch (error) {
+      setReferralError(friendlyError(error, "Could not load referral code."));
+    } finally { setReferralLoading(false); }
+  }
+
+  useEffect(() => {
+    if (activeTab === "referral") void loadReferral();
+  }, [activeTab]);
+
+  function copyCode(): void {
+    if (!referral) return;
+    void navigator.clipboard.writeText(referral.referralUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   const estimated = useMemo(
     () => estimateFromPlanner({ ai: planAi, intros: planIntros, listings: planListings, circles: planCircles }),
     [planAi, planIntros, planListings, planCircles]
@@ -109,16 +166,149 @@ export function CreditsStudio() {
   async function buy(packageId: CreditPackage["id"]): Promise<void> {
     setBuying(packageId); setErrorLine(null);
     try {
-      await postJson("/v1/credits/purchase", { packageId }, { auth: true });
-      setStatusLine("Credits added. Your next introduction is ready.");
-      await refresh();
+      const res = await postJson<{ url: string }>("/v1/credits/checkout", { packageId }, { auth: true });
+      if (res.url) {
+        window.location.href = res.url;
+        return;
+      }
+      throw new Error("No checkout URL returned.");
     } catch (error) {
       setErrorLine(friendlyError(error, "Purchase could not be completed."));
-    } finally { setBuying(null); }
+      setBuying(null);
+    }
   }
 
   return (
     <div className="grid gap-4">
+      {/* Tab switcher */}
+      <div className="flex gap-2">
+        {([
+          { id: "credits", label: "Credits" },
+          { id: "referral", label: "Refer & Earn" },
+        ] as const).map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className="rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors"
+            style={{
+              background: activeTab === tab.id ? "rgba(196,151,58,0.18)" : "rgba(196,151,58,0.05)",
+              border: activeTab === tab.id ? "1px solid rgba(196,151,58,0.40)" : "1px solid rgba(196,151,58,0.15)",
+              color: activeTab === tab.id ? G.champagne : G.muted,
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Referral tab */}
+      {activeTab === "referral" && (
+        <div className="grid gap-4">
+          <section className="surface-stage rounded-[1.8rem] p-5 sm:p-7">
+            <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>Refer & Earn</p>
+            <h1 className="mt-3 leading-tight" style={{ fontFamily: G.display, fontSize: "clamp(2rem,4vw,2.8rem)", color: G.champagne }}>
+              Grow the circle.<br />Earn together.
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed" style={{ color: G.muted }}>
+              Share your unique referral link with trusted operators. When they join and get verified, you both earn credits — no cap, no expiry.
+            </p>
+          </section>
+
+          {/* Reward structure */}
+          <section className="surface-elevated rounded-[1.5rem] p-5">
+            <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>Reward Structure</p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                { label: "You earn (Standard)", value: "20 cr", desc: "Per verified referral" },
+                { label: "You earn (VIP)", value: "40 cr", desc: "Double reward for VIP members" },
+                { label: "New member earns", value: "10 cr", desc: "Welcome bonus on signup" },
+              ].map(({ label, value, desc }) => (
+                <div key={label} className="rounded-xl p-4 text-center"
+                  style={{ background: "rgba(196,151,58,0.05)", border: "1px solid rgba(196,151,58,0.14)" }}>
+                  <p className="text-2xl font-semibold" style={{ color: G.champagne, fontFamily: G.display }}>{value}</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em]" style={{ color: G.gold }}>{label}</p>
+                  <p className="mt-0.5 text-xs" style={{ color: G.muted }}>{desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Referral code — 2-col on desktop */}
+          <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+            <section className="surface-elevated rounded-[1.5rem] p-5">
+              <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>Your Referral Link</p>
+              {!getSessionToken() && (
+                <p className="text-sm" style={{ color: G.muted }}>Sign in from Workspace to get your personal referral link.</p>
+              )}
+              {getSessionToken() && referralLoading && (
+                <p className="text-sm" style={{ color: G.muted }}>Loading your referral code…</p>
+              )}
+              {referralError && (
+                <p className="text-sm" style={{ color: "var(--danger)" }}>{referralError}</p>
+              )}
+              {referral && (
+                <div className="grid gap-3">
+                  {referral.isVip && (
+                    <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 self-start"
+                      style={{ background: "rgba(196,151,58,0.12)", border: "1px solid rgba(196,151,58,0.30)" }}>
+                      <span className="text-xs font-semibold" style={{ color: G.gold }}>✦ VIP — earning 40 cr per referral</span>
+                    </div>
+                  )}
+                  <div className="rounded-xl p-4"
+                    style={{ background: "rgba(196,151,58,0.06)", border: "1px solid rgba(196,151,58,0.22)" }}>
+                    <p className="text-[10px] uppercase tracking-[0.16em] mb-1" style={{ color: G.muted }}>Your Code</p>
+                    <p className="text-lg font-semibold tracking-widest" style={{ color: G.champagne, fontFamily: G.display }}>{referral.code}</p>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl p-4"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(196,151,58,0.14)" }}>
+                    <p className="flex-1 text-sm truncate min-w-0" style={{ color: G.muted }}>{referral.referralUrl}</p>
+                    <button
+                      onClick={copyCode}
+                      className="rounded-lg px-4 py-2 text-xs font-semibold shrink-0 transition-colors"
+                      style={{
+                        background: copied ? "rgba(157,207,136,0.15)" : "rgba(196,151,58,0.12)",
+                        border: copied ? "1px solid rgba(157,207,136,0.40)" : "1px solid rgba(196,151,58,0.30)",
+                        color: copied ? "#9dcf88" : G.gold,
+                      }}
+                    >
+                      {copied ? "Copied ✓" : "Copy Link"}
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl p-4"
+                    style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,151,58,0.08)" }}>
+                    <p className="text-sm" style={{ color: G.muted }}>Total referrals so far</p>
+                    <p className="text-xl font-semibold" style={{ color: G.champagne, fontFamily: G.display }}>{referral.uses}</p>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* How it works — second column on desktop */}
+            <section className="surface-elevated rounded-[1.5rem] p-5">
+              <p className="text-[10px] uppercase tracking-[0.22em] mb-4" style={{ color: G.muted }}>How It Works</p>
+              <div className="grid gap-3">
+                {[
+                  { step: "01", title: "Share your link", desc: "Send your unique referral link to trusted founders, operators, and investors in the Balearics." },
+                  { step: "02", title: "They apply & get verified", desc: "Your referral submits their application. Once verified and approved, the reward triggers automatically." },
+                  { step: "03", title: "Both earn credits", desc: "You earn 20 cr (or 40 cr if you're VIP). They receive a 10 cr welcome bonus. No cap, no expiry." },
+                ].map(({ step, title, desc }) => (
+                  <div key={step} className="flex gap-3 rounded-xl p-3"
+                    style={{ background: "rgba(196,151,58,0.04)", border: "1px solid rgba(196,151,58,0.10)" }}>
+                    <span className="text-[10px] font-semibold shrink-0 mt-0.5" style={{ color: G.gold }}>{step}</span>
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: G.champagne }}>{title}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed" style={{ color: G.muted }}>{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+      )}
+
+      {/* Credits tab */}
+      {activeTab === "credits" && <>
       {/* Header */}
       <section className="surface-stage rounded-[1.8rem] p-5 sm:p-7">
         <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>Credits Studio</p>
@@ -330,6 +520,7 @@ export function CreditsStudio() {
           )}
         </div>
       </section>
+      </>}
     </div>
   );
 }

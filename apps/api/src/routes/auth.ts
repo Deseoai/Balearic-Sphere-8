@@ -9,6 +9,7 @@ import {
   consumeMagicLink,
   createMagicLink,
   createSession,
+  deleteUserById,
   recalculateTrustScore,
   revokeSessionByToken,
   updateUserById,
@@ -324,5 +325,38 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
     await recalculateTrustScore(session.userId);
 
     return reply.send({ avatarUrl, user: updated });
+  });
+
+  // DELETE /v1/auth/me — permanent account deletion (GDPR right to erasure)
+  app.delete("/v1/auth/me", async (request, reply) => {
+    const session = await requireSession(request, reply);
+    if (!session) return;
+
+    const parsed = z.object({ confirmEmail: z.string().email() }).safeParse(request.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: "invalid_payload", message: "Provide your email address to confirm deletion." });
+    }
+    if (parsed.data.confirmEmail.toLowerCase() !== session.email.toLowerCase()) {
+      return reply.status(400).send({ error: "email_mismatch", message: "Confirmation email does not match your account email." });
+    }
+
+    const deletedAt = new Date().toISOString();
+
+    // Emit deletion event to n8n → Notion BEFORE deleting (so we have the data)
+    await emitEventHub({
+      event: "user.account.deleted",
+      data: {
+        userId: session.userId,
+        email: session.email,
+        requestedAt: deletedAt,
+        reason: "user_self_deletion",
+        gdprBasis: "right_to_erasure_article_17_gdpr",
+        note: "All personal data removed from the application database. This record is the only retention for audit compliance."
+      }
+    });
+
+    await deleteUserById({ userId: session.userId, removedBy: session.userId });
+
+    return reply.send({ status: "account_deleted", message: "Your account and all associated data have been permanently removed." });
   });
 }

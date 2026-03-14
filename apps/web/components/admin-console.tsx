@@ -43,6 +43,8 @@ type AdminUser = {
   role: string;
   accessLevel: string;
   verificationStatus: "none" | "pending" | "verified" | "rejected";
+  isElite?: boolean;
+  isVip?: boolean;
   createdAt: string;
   updatedAt: string;
   magicLinksTotal: number;
@@ -388,6 +390,24 @@ export function AdminConsole() {
       await refresh();
     } catch (error) {
       setErrorLine(friendlyError(error, "Could not remove user."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function toggleElite(user: AdminUser): Promise<void> {
+    setBusy(true);
+    setErrorLine(null);
+    try {
+      const newStatus = !user.isElite;
+      await adminFetch(`/v1/admin/users/${user.userId}/elite`, {
+        method: "PATCH",
+        body: JSON.stringify({ isElite: newStatus })
+      });
+      setUsers(prev => prev.map(u => u.userId === user.userId ? { ...u, isElite: newStatus } : u));
+      setStatusLine(`${user.displayName || user.email} ${newStatus ? "added to" : "removed from"} Inner Circle ✦`);
+    } catch (error) {
+      setErrorLine(friendlyError(error, "Could not update Inner Circle status."));
     } finally {
       setBusy(false);
     }
@@ -845,6 +865,12 @@ export function AdminConsole() {
                     <span className="soft-pill px-2 py-1">{titleCase(user.role)}</span>
                     <span className="soft-pill px-2 py-1">{titleCase(user.accessLevel)}</span>
                     <span className="soft-pill px-2 py-1">{titleCase(user.verificationStatus)}</span>
+                    {user.isElite && (
+                      <span className="rounded-full px-2 py-1 text-[10px] font-semibold" style={{ background: "rgba(196,151,58,0.18)", color: "#D4A84A", border: "1px solid rgba(196,151,58,0.40)" }}>✦ Inner Circle</span>
+                    )}
+                    {user.isVip && (
+                      <span className="rounded-full px-2 py-1 text-[10px] font-semibold" style={{ background: "rgba(196,151,58,0.10)", color: "#C4973A", border: "1px solid rgba(196,151,58,0.25)" }}>VIP</span>
+                    )}
                   </div>
                 </div>
 
@@ -861,6 +887,17 @@ export function AdminConsole() {
                   </button>
                   <button onClick={() => void toggleMagicLinks(user)} className="soft-pill premium-button px-3 py-2 text-xs">
                     {magicOpen ? "Hide link history" : "Show link history"}
+                  </button>
+                  <button
+                    onClick={() => void toggleElite(user)}
+                    disabled={busy}
+                    className="premium-button rounded-xl px-3 py-2 text-xs"
+                    style={user.isElite
+                      ? { background: "rgba(196,151,58,0.18)", color: "#D4A84A", border: "1px solid rgba(196,151,58,0.40)" }
+                      : { background: "rgba(196,151,58,0.08)", color: "#C4973A", border: "1px solid rgba(196,151,58,0.20)" }
+                    }
+                  >
+                    {user.isElite ? "Remove from Inner Circle" : "✦ Add to Inner Circle"}
                   </button>
                   <button onClick={() => void removeUser(user)} disabled={busy} className="sun-button premium-button rounded-xl px-3 py-2 text-xs">
                     Remove user

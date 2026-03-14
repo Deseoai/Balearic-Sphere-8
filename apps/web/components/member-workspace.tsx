@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiBaseUrl, clearSessionToken, getJson, getSessionToken, postJson, setSessionToken } from "../lib/api";
+import { AiToolsPanel } from "./ai-tools-panel";
 
 type AuthUser = {
   userId: string;
@@ -542,6 +543,14 @@ export function MemberWorkspace() {
             </p>
           )}
         </section>
+      )}
+
+      {/* AI Tools */}
+      {canUseMemberActions && (
+        <AiToolsPanel
+          balance={credits?.balance ?? 0}
+          onCreditSpent={() => { void loadWorkspace(); }}
+        />
       )}
 
       {/* Credits + Quick Actions */}

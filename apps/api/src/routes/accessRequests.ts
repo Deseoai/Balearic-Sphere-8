@@ -25,7 +25,8 @@ const accessRequestSchema = z.object({
   whyJoin: z.string().min(15).max(1500),
   website: z.string().url(),
   linkedin: z.string().url().optional().or(z.literal("")),
-  instagram: z.string().url().optional().or(z.literal(""))
+  instagram: z.string().url().optional().or(z.literal("")),
+  consentGiven: z.literal(true, { errorMap: () => ({ message: "You must agree to the data processing terms to submit." }) })
 });
 
 export async function registerAccessRequestRoutes(app: FastifyInstance): Promise<void> {
@@ -102,6 +103,22 @@ export async function registerAccessRequestRoutes(app: FastifyInstance): Promise
         await emitRewardEvent({ event: "credits.referral.pending", data: referralData });
       }
     }
+
+    // Log consent to n8n → Notion for GDPR compliance
+    await emitEventHub({
+      event: "user.consent.given",
+      data: {
+        userId: account.userId,
+        email: created.email,
+        name: created.name,
+        consentType: "data_processing_membership",
+        consentText: "I agree that Balea Sphere stores and processes my personal data for the purpose of membership administration and network facilitation, in accordance with the Privacy Policy.",
+        consentGiven: true,
+        givenAt: createdAt,
+        applicationId: created.id,
+        ipContext: "access_request_form"
+      }
+    });
 
     const applicationEvent = await emitEventHub({
       event: "application.submitted",

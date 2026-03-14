@@ -26,6 +26,34 @@ type EliteMember = {
 
 type Me = { userId: string; displayName?: string; isElite?: boolean; role: string; avatarUrl?: string };
 
+function mentionKey(name: string): string {
+  return name.split(/\s+/)[0].toLowerCase();
+}
+
+function renderContent(content: string, myUserId: string, meDisplayName?: string): React.ReactNode[] {
+  const myKey = meDisplayName ? mentionKey(meDisplayName) : "";
+  const parts = content.split(/(@[\w\u00C0-\u024F\u1E00-\u1EFF-]+)/g);
+  return parts.map((part, i) => {
+    if (/^@[\w\u00C0-\u024F\u1E00-\u1EFF-]+$/.test(part)) {
+      const token = part.slice(1).toLowerCase();
+      const isMe = myKey && token === myKey;
+      return (
+        <span
+          key={i}
+          className="inline-block rounded px-1 font-semibold"
+          style={isMe
+            ? { background: "rgba(212,168,74,0.28)", color: "#F0D890", border: "1px solid rgba(212,168,74,0.45)" }
+            : { background: "rgba(212,168,74,0.12)", color: "#D4A84A" }
+          }
+        >
+          {part}
+        </span>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 const G = {
   gold: "var(--gold)",
   champagne: "var(--champagne)",
@@ -80,6 +108,9 @@ export function EliteCircleHub() {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
   const [showMembers, setShowMembers] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionSuggestions, setMentionSuggestions] = useState<EliteMember[]>([]);
+  const inputRef                    = useRef<HTMLInputElement>(null);
   const messagesEndRef              = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -119,8 +150,42 @@ export function EliteCircleHub() {
     return () => clearInterval(timer);
   }, []);
 
+  function handleInputChange(val: string) {
+    setInput(val);
+    // Detect @mention query: find last @ before cursor
+    const atIdx = val.lastIndexOf("@");
+    if (atIdx !== -1 && (atIdx === 0 || /\s/.test(val[atIdx - 1]))) {
+      const query = val.slice(atIdx + 1).toLowerCase();
+      if (!query.includes(" ")) {
+        setMentionQuery(query);
+        const filtered = members.filter(m => {
+          const name = (m.displayName ?? "").toLowerCase();
+          const key = mentionKey(m.displayName ?? "");
+          return key.startsWith(query) || name.startsWith(query);
+        }).slice(0, 5);
+        setMentionSuggestions(filtered);
+        return;
+      }
+    }
+    setMentionQuery(null);
+    setMentionSuggestions([]);
+  }
+
+  function insertMention(member: EliteMember) {
+    const key = mentionKey(member.displayName ?? member.userId);
+    const atIdx = input.lastIndexOf("@");
+    const before = input.slice(0, atIdx);
+    const after = input.slice(atIdx + 1 + (mentionQuery?.length ?? 0));
+    setInput(`${before}@${key}${after.startsWith(" ") ? "" : " "}${after}`);
+    setMentionQuery(null);
+    setMentionSuggestions([]);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
   const sendMessage = async () => {
     if (!input.trim() || sending) return;
+    setMentionQuery(null);
+    setMentionSuggestions([]);
     setSending(true);
     try {
       const res = await apiFetch<{ message: EliteMessage }>("/v1/elite/messages", {
@@ -206,7 +271,7 @@ export function EliteCircleHub() {
               borderBottomLeftRadius: "4px",
             }}
           >
-            {msg.content}
+            {renderContent(msg.content, me?.userId ?? "", me?.displayName)}
           </div>
         </div>
       </motion.div>
@@ -279,18 +344,42 @@ export function EliteCircleHub() {
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t" style={{ borderColor: "rgba(212,168,74,0.12)" }}>
+          <div className="p-4 border-t relative" style={{ borderColor: "rgba(212,168,74,0.12)" }}>
             {error && (
               <p className="mb-2 text-xs px-3 py-1.5 rounded-lg" style={{ background: "rgba(201,123,110,0.08)", color: "#E8A898", border: "1px solid rgba(201,123,110,0.20)" }}>
                 {error}
               </p>
             )}
+            {/* @mention suggestion dropdown */}
+            {mentionSuggestions.length > 0 && (
+              <div
+                className="absolute left-4 right-4 bottom-full mb-2 rounded-xl overflow-hidden z-10"
+                style={{ background: "rgba(14,13,11,0.97)", border: "1px solid rgba(212,168,74,0.30)", boxShadow: "0 8px 24px rgba(0,0,0,0.50)" }}
+              >
+                {mentionSuggestions.map(m => (
+                  <button
+                    key={m.userId}
+                    onMouseDown={e => { e.preventDefault(); insertMention(m); }}
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5"
+                    style={{ color: G.champagne }}
+                  >
+                    <Avatar name={m.displayName ?? m.companyName} avatarUrl={m.avatarUrl} size={24} />
+                    <span>{m.displayName ?? m.companyName ?? "Member"}</span>
+                    <span className="text-[10px] ml-auto" style={{ color: G.muted }}>@{mentionKey(m.displayName ?? m.userId)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex gap-2">
               <input
+                ref={inputRef}
                 value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(); } }}
-                placeholder="Share something with the circle…"
+                onChange={e => handleInputChange(e.target.value)}
+                onKeyDown={e => {
+                  if (mentionSuggestions.length > 0 && e.key === "Escape") { setMentionSuggestions([]); return; }
+                  if (e.key === "Enter" && !e.shiftKey && mentionSuggestions.length === 0) { e.preventDefault(); void sendMessage(); }
+                }}
+                placeholder="Share something… use @ to mention a member"
                 className="flex-1 rounded-xl px-4 py-3 text-sm outline-none"
                 style={{
                   background: "rgba(255,255,255,0.04)",

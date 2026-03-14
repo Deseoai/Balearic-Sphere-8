@@ -26,6 +26,7 @@ import {
   recalculateTrustScore,
   reviewAccessRequest,
   reviewCircleUpgradeRequest,
+  setUserEliteStatus,
   setUserRoleAndAccessByEmail,
   updateUserById,
   upsertUserAccount
@@ -689,6 +690,34 @@ export async function registerAdminRoutes(app: FastifyInstance): Promise<void> {
       return {
         items: await listAuditEvents(query.limit ?? 200)
       };
+    }
+  );
+
+  // Elite Circle — toggle membership for a user
+  app.patch(
+    "/v1/admin/users/:id/elite",
+    { preHandler: requireAdminToken },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const parsed = z.object({ isElite: z.boolean() }).safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(400).send({ error: "invalid_payload" });
+      }
+      const user = await getUserById(id);
+      if (!user) return reply.status(404).send({ error: "user_not_found" });
+      await setUserEliteStatus(id, parsed.data.isElite);
+      await emitEventHub({
+        event: parsed.data.isElite ? "user.elite.granted" : "user.elite.revoked",
+        source: "admin-ui",
+        data: {
+          userId: id,
+          email: user.email,
+          displayName: user.displayName ?? "",
+          isElite: parsed.data.isElite,
+          changedAt: new Date().toISOString()
+        }
+      });
+      return reply.send({ userId: id, isElite: parsed.data.isElite });
     }
   );
 }
