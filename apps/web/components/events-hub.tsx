@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { apiBaseUrl, getSessionToken } from "../lib/api";
+import { useLang } from "../lib/i18n";
 
 type EventTopic = "networking" | "business" | "investment" | "lifestyle" | "wellness" | "social" | "other";
 
@@ -208,6 +209,7 @@ const EMPTY_FORM: FormState = {
 };
 
 export function EventsHub() {
+  const { t } = useLang();
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [attending, setAttending] = useState<Record<string, boolean>>({});
   const [detail, setDetail] = useState<EventDetail | null>(null);
@@ -348,20 +350,20 @@ export function EventsHub() {
           <div>
             <span className="inline-block rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.22em] font-semibold mb-3"
               style={{ background: "rgba(196,151,58,0.12)", border: "1px solid rgba(196,151,58,0.28)", color: G.gold }}>
-              Offline Events
+              {t("events.eyebrow")}
             </span>
             <h1 style={{ fontFamily: G.display, fontSize: "clamp(2rem,4vw,3rem)", color: G.champagne, lineHeight: 1.1 }}>
-              Real Meetings,<br />Real Connections
+              {t("events.title")}
             </h1>
             <p className="mt-2 text-sm max-w-lg" style={{ color: G.muted }}>
-              Plan and discover exclusive offline gatherings within the Balea Sphere community — dinners, summits, yacht days, and more.
+              {t("events.subtext")}
             </p>
           </div>
           <button
             onClick={() => { setShowCreate(v => !v); setError(null); }}
             className="btn-primary premium-button rounded-xl px-6 py-3 text-sm shrink-0"
           >
-            {showCreate ? "Cancel" : "+ Create Event"}
+            {showCreate ? t("common.cancel") : t("events.createEvent")}
           </button>
         </div>
 
@@ -455,11 +457,11 @@ export function EventsHub() {
           <div className="mt-5 flex gap-3 flex-wrap">
             <button onClick={() => void handleCreate()} disabled={creating}
               className="btn-primary premium-button rounded-xl px-7 py-3 text-sm disabled:opacity-50">
-              {creating ? "Publishing…" : "Publish Event"}
+              {creating ? t("common.loading") : t("events.publishEvent")}
             </button>
             <button onClick={() => { setShowCreate(false); setForm(EMPTY_FORM); setError(null); }}
               className="rounded-xl px-5 py-3 text-sm" style={{ border: "1px solid rgba(196,151,58,0.20)", color: G.muted }}>
-              Discard
+              {t("common.cancel")}
             </button>
           </div>
         </section>
@@ -467,7 +469,7 @@ export function EventsHub() {
 
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">
-        {([["upcoming", "Upcoming"], ["past", "Past"], ["mine", "My Events"]] as const).map(([val, label]) => (
+        {([["upcoming", t("events.filterUpcoming")], ["past", t("events.filterPast")], ["mine", t("events.filterMine")]] as [typeof filter, string][]).map(([val, label]) => (
           <button key={val} onClick={() => setFilter(val)}
             className="rounded-full px-4 py-1.5 text-xs transition-all"
             style={{
@@ -487,16 +489,16 @@ export function EventsHub() {
         {/* Events list */}
         <div>
           {loading ? (
-            <div className="rounded-[1.4rem] p-8 text-center text-sm" style={{ color: G.muted }}>Loading events…</div>
+            <div className="rounded-[1.4rem] p-8 text-center text-sm" style={{ color: G.muted }}>{t("events.loadingEvents")}</div>
           ) : events.length === 0 ? (
             <div className="rounded-[1.8rem] p-10 text-center surface-elevated">
-              <p style={{ fontFamily: G.display, fontSize: "1.6rem", color: G.champagne }}>No events yet</p>
+              <p style={{ fontFamily: G.display, fontSize: "1.6rem", color: G.champagne }}>{t("events.title")}</p>
               <p className="mt-2 text-sm" style={{ color: G.muted }}>
-                {filter === "upcoming" ? "Be the first to create an event for the community." : filter === "mine" ? "You haven't created any events yet." : "No past events found."}
+                {filter === "upcoming" ? t("events.noUpcomingEvents") : filter === "mine" ? t("events.filterMine") : t("events.noPastEvents")}
               </p>
               {filter === "upcoming" && (
                 <button onClick={() => setShowCreate(true)} className="mt-4 btn-primary premium-button rounded-xl px-6 py-2.5 text-sm">
-                  Create First Event
+                  {t("events.createEvent")}
                 </button>
               )}
             </div>

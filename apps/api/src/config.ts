@@ -32,7 +32,9 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
-  OPENAI_MODEL: z.string().default("gpt-4o-mini")
+  OPENAI_MODEL: z.string().default("gpt-4o-mini"),
+  GOOGLE_API_KEY: z.string().optional(),
+  GOOGLE_SEARCH_CX: z.string().optional()
 });
 
 const parsed = envSchema.parse(process.env);

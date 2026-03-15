@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiBaseUrl, getSessionToken } from "../lib/api";
+import { useLang } from "../lib/i18n";
 
 const INDUSTRY_OPTIONS = [
   { value: "", label: "— Select Industry —" },
@@ -77,6 +78,7 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 export function ProfileSettings() {
+  const { t } = useLang();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -227,7 +229,7 @@ export function ProfileSettings() {
   if (loading) {
     return (
       <section className="surface-stage rounded-[1.8rem] p-8 text-center">
-        <p className="text-sm" style={{ color: G.muted }}>Loading profile…</p>
+        <p className="text-sm" style={{ color: G.muted }}>{t("common.loading")}</p>
       </section>
     );
   }
@@ -236,7 +238,7 @@ export function ProfileSettings() {
     return (
       <section className="surface-stage rounded-[1.8rem] p-8 sm:p-12">
         <h1 style={{ fontFamily: G.display, fontSize: "clamp(2rem,4vw,3rem)", color: G.champagne }}>
-          Sign in to access settings
+          {t("settings.signInPrompt")}
         </h1>
         <p className="mt-3 text-sm" style={{ color: G.muted }}>
           Request a magic link to sign in to your account.
@@ -254,7 +256,7 @@ export function ProfileSettings() {
             disabled={sendingMagicLink}
             className="btn-primary premium-button rounded-xl px-6 py-3 text-sm disabled:opacity-50"
           >
-            {sendingMagicLink ? "Sending…" : "Request Magic Link"}
+            {sendingMagicLink ? t("common.loading") : "Request Magic Link"}
           </button>
         </div>
         {magicLinkSent && <p className="mt-3 text-sm" style={{ color: "#a0c890" }}>Magic link sent! Check your inbox.</p>}
@@ -275,7 +277,7 @@ export function ProfileSettings() {
       <section className="surface-stage rounded-[1.8rem] p-6 sm:p-8">
         <span className="inline-block rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.22em] font-semibold mb-4"
           style={{ background: "rgba(196,151,58,0.12)", border: "1px solid rgba(196,151,58,0.28)", color: "var(--gold)" }}>
-          Profile &amp; Settings
+          {t("settings.title")}
         </span>
         <div className="flex flex-wrap items-center gap-5">
           {/* Avatar */}
@@ -328,12 +330,12 @@ export function ProfileSettings() {
 
       {/* Edit Profile */}
       <section className="surface-elevated rounded-[1.8rem] p-6 sm:p-8">
-        <p className="text-[10px] uppercase tracking-[0.28em] mb-4" style={{ color: G.muted }}>Profile Information</p>
+        <p className="text-[10px] uppercase tracking-[0.28em] mb-4" style={{ color: G.muted }}>{t("settings.profileSection")}</p>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-              Display Name
+              {t("settings.displayName")}
             </label>
             <input
               value={displayName}
@@ -345,7 +347,7 @@ export function ProfileSettings() {
 
           <div>
             <label className="mb-1.5 block text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-              Email Address
+              {t("settings.email")}
             </label>
             <input
               value={user.email}
@@ -360,7 +362,7 @@ export function ProfileSettings() {
 
           <div>
             <label className="mb-1.5 block text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-              Company / Business Name
+              {t("settings.company")}
             </label>
             <input
               value={companyName}
@@ -372,7 +374,7 @@ export function ProfileSettings() {
 
           <div>
             <label className="mb-1.5 block text-xs uppercase tracking-[0.14em]" style={{ color: G.muted }}>
-              Industry
+              {t("applyForm.fieldIndustrySector")}
             </label>
             <select
               value={industry}
@@ -392,14 +394,14 @@ export function ProfileSettings() {
             disabled={saving}
             className="btn-primary premium-button rounded-xl px-7 py-3 text-sm disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Save Changes"}
+            {saving ? t("common.loading") : t("settings.saveProfile")}
           </button>
         </div>
       </section>
 
       {/* Data & Privacy */}
       <section className="surface-elevated rounded-[1.8rem] p-6 sm:p-8">
-        <p className="text-[10px] uppercase tracking-[0.28em] mb-1" style={{ color: G.muted }}>Data &amp; Privacy</p>
+        <p className="text-[10px] uppercase tracking-[0.28em] mb-1" style={{ color: G.muted }}>{t("settings.privacySection")}</p>
         <p className="text-xs mb-5" style={{ color: G.muted }}>
           You have the right to access, correct, or permanently delete your personal data at any time under GDPR Article 17.
         </p>
@@ -418,7 +420,7 @@ export function ProfileSettings() {
               className="rounded-xl px-5 py-2.5 text-xs"
               style={{ border: "1px solid rgba(201,123,110,0.30)", color: "#E8A898", background: "rgba(201,123,110,0.04)" }}
             >
-              Delete My Account
+              {t("settings.deleteAccount")}
             </button>
             <p className="mt-2 text-[11px]" style={{ color: G.muted }}>
               Permanently removes all your data from Balea Sphere. This action cannot be undone.
@@ -426,7 +428,7 @@ export function ProfileSettings() {
           </div>
         ) : (
           <div className="mt-5 rounded-xl p-5" style={{ background: "rgba(201,123,110,0.06)", border: "1px solid rgba(201,123,110,0.22)" }}>
-            <p className="text-sm font-semibold mb-1" style={{ color: "#E8B4BC" }}>Confirm Account Deletion</p>
+            <p className="text-sm font-semibold mb-1" style={{ color: "#E8B4BC" }}>{t("settings.dangerZone")}</p>
             <p className="text-xs mb-4" style={{ color: G.muted }}>
               This permanently deletes your profile, credits, messages, and all associated data. The deletion is logged for GDPR compliance. Type your email address to confirm.
             </p>
@@ -445,14 +447,14 @@ export function ProfileSettings() {
                 className="rounded-xl px-5 py-2.5 text-xs disabled:opacity-50"
                 style={{ background: "rgba(201,123,110,0.15)", border: "1px solid rgba(201,123,110,0.45)", color: "#E8A898" }}
               >
-                {deleting ? "Deleting…" : "Permanently Delete My Account"}
+                {deleting ? t("common.loading") : t("settings.deleteAccount")}
               </button>
               <button
                 onClick={() => { setShowDeletePanel(false); setDeleteConfirmEmail(""); setDeleteError(null); }}
                 className="rounded-xl px-5 py-2.5 text-xs"
                 style={{ border: "1px solid rgba(196,151,58,0.20)", color: G.muted }}
               >
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           </div>
@@ -461,7 +463,7 @@ export function ProfileSettings() {
 
       {/* Session & Security */}
       <section className="surface-elevated rounded-[1.8rem] p-6 sm:p-8">
-        <p className="text-[10px] uppercase tracking-[0.28em] mb-4" style={{ color: G.muted }}>Session &amp; Security</p>
+        <p className="text-[10px] uppercase tracking-[0.28em] mb-4" style={{ color: G.muted }}>{t("settings.accountSection")}</p>
 
         {hasAdminSession && (
           <div className="mb-5 rounded-xl p-4" style={{ background: "rgba(201,123,110,0.08)", border: "1px solid rgba(201,123,110,0.22)" }}>
@@ -497,13 +499,13 @@ export function ProfileSettings() {
                 disabled={sendingMagicLink}
                 className="btn-secondary rounded-xl px-5 py-2 text-xs disabled:opacity-50"
               >
-                {sendingMagicLink ? "Sending…" : "Request Magic Link"}
+                {sendingMagicLink ? t("common.loading") : "Request Magic Link"}
               </button>
             )}
           </div>
 
           <div className="rounded-xl p-4" style={{ background: "rgba(201,123,110,0.04)", border: "1px solid rgba(201,123,110,0.12)" }}>
-            <p className="text-sm font-semibold" style={{ color: "#E8B4BC" }}>Sign Out</p>
+            <p className="text-sm font-semibold" style={{ color: "#E8B4BC" }}>{t("nav.signOut")}</p>
             <p className="mt-1 text-xs mb-3" style={{ color: G.muted }}>
               Revoke your current session and return to the homepage.
             </p>
@@ -512,7 +514,7 @@ export function ProfileSettings() {
               className="rounded-xl px-5 py-2 text-xs"
               style={{ border: "1px solid rgba(201,123,110,0.30)", color: "#E8A898" }}
             >
-              Sign Out
+              {t("nav.signOut")}
             </button>
           </div>
         </div>

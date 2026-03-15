@@ -44,7 +44,7 @@ type UpsertUserInput = {
 
 let pool: PgPool | null = null;
 
-function getPool(): PgPool {
+function requirePool(): PgPool {
   if (!env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required when DATA_BACKEND=postgres");
   }
@@ -58,6 +58,12 @@ function getPool(): PgPool {
   }
 
   return pool;
+}
+
+// Exported for route files that do direct queries (returns null when DB not configured)
+export function getPool(): PgPool | null {
+  if (!env.DATABASE_URL) return null;
+  return requirePool();
 }
 
 function toIso(value: unknown): string {
@@ -229,7 +235,7 @@ function normalizePair(userA: string, userB: string): { participantA: string; pa
 }
 
 export async function initPostgresStore(): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(`
     create table if not exists app_access_requests (
       id text primary key,
@@ -515,7 +521,7 @@ export async function initPostgresStore(): Promise<void> {
 }
 
 export async function saveAccessRequest(record: AccessRequestRecord): Promise<AccessRequestRecord> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `
       insert into app_access_requests (
@@ -569,7 +575,7 @@ export async function saveAccessRequest(record: AccessRequestRecord): Promise<Ac
 }
 
 export async function listAccessRequests(filter?: { status?: AccessRequestStatus }): Promise<AccessRequestRecord[]> {
-  const db = getPool();
+  const db = requirePool();
   const result = filter?.status
     ? await db.query("select * from app_access_requests where status = $1 order by created_at desc", [filter.status])
     : await db.query("select * from app_access_requests order by created_at desc");
@@ -577,7 +583,7 @@ export async function listAccessRequests(filter?: { status?: AccessRequestStatus
 }
 
 export async function getAccessRequestById(id: string): Promise<AccessRequestRecord | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query("select * from app_access_requests where id = $1 limit 1", [id]);
   if (result.rowCount === 0) return undefined;
   return mapAccessRequest(result.rows[0]);
@@ -592,7 +598,7 @@ export async function reviewAccessRequest(input: {
   reviewedBy: string;
   reviewedAt: string;
 }): Promise<AccessRequestRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `
       update app_access_requests
@@ -675,7 +681,7 @@ export async function applyReviewedApplicationCallback(input: {
 }
 
 export async function addCreditTransaction(tx: CreditTransaction): Promise<CreditTransaction> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `insert into app_credit_transactions (id, user_id, type, amount, reason, created_at)
      values ($1, $2, $3, $4, $5, $6)`,
@@ -698,7 +704,7 @@ export async function addCreditTransaction(tx: CreditTransaction): Promise<Credi
 }
 
 export async function listCreditTransactions(userId: string): Promise<CreditTransaction[]> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     "select * from app_credit_transactions where user_id = $1 order by created_at desc",
     [userId]
@@ -707,7 +713,7 @@ export async function listCreditTransactions(userId: string): Promise<CreditTran
 }
 
 export async function sumCreditBalance(userId: string): Promise<number> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query("select coalesce(sum(amount), 0) as balance from app_credit_transactions where user_id = $1", [
     userId
   ]);
@@ -720,7 +726,7 @@ export async function issueWelcomeCredits(userId: string): Promise<CreditTransac
     { amount: 200, type: "welcome_bonus", reason: "Welcome to Balea Sphere — 200 complimentary credits" }
   ];
 
-  const db = getPool();
+  const db = requirePool();
   const existingResult = await db.query(
     "select type from app_credit_transactions where user_id = $1 and type = any($2::text[])",
     [userId, entries.map((entry) => entry.type)]
@@ -749,7 +755,7 @@ export async function issueWelcomeCredits(userId: string): Promise<CreditTransac
 export async function saveCircleUpgradeRequest(
   record: CircleUpgradeRequestRecord
 ): Promise<CircleUpgradeRequestRecord> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `
       insert into app_circle_upgrades (
@@ -790,7 +796,7 @@ export async function listCircleUpgradeRequests(filter?: {
   userId?: string;
   status?: CircleUpgradeStatus;
 }): Promise<CircleUpgradeRequestRecord[]> {
-  const db = getPool();
+  const db = requirePool();
   const where: string[] = [];
   const params: string[] = [];
 
@@ -815,7 +821,7 @@ export async function listCircleUpgradeRequests(filter?: {
 }
 
 export async function getCircleUpgradeRequestById(id: string): Promise<CircleUpgradeRequestRecord | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query("select * from app_circle_upgrades where id = $1 limit 1", [id]);
   if (result.rowCount === 0) return undefined;
   return mapCircleRequest(result.rows[0]);
@@ -828,7 +834,7 @@ export async function reviewCircleUpgradeRequest(input: {
   reviewedAt: string;
   decisionNotes?: string;
 }): Promise<CircleUpgradeRequestRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `
       update app_circle_upgrades
@@ -889,7 +895,7 @@ export async function applyReviewedUpgradeCallback(input: {
 }
 
 export async function saveAiRequest(record: AiRequestRecord): Promise<AiRequestRecord> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `
       insert into app_ai_requests (
@@ -937,7 +943,7 @@ export async function listAiRequests(filter?: {
   userId?: string;
   status?: AiRequestRecord["status"];
 }): Promise<AiRequestRecord[]> {
-  const db = getPool();
+  const db = requirePool();
   const where: string[] = [];
   const params: string[] = [];
 
@@ -962,7 +968,7 @@ export async function listAiRequests(filter?: {
 }
 
 export async function getAiRequestById(id: string): Promise<AiRequestRecord | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query("select * from app_ai_requests where id = $1 limit 1", [id]);
   if (result.rowCount === 0) return undefined;
   return mapAiRequest(result.rows[0]);
@@ -974,7 +980,7 @@ export async function completeAiRequest(input: {
   model: string;
   completedAt: string;
 }): Promise<AiRequestRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `
       update app_ai_requests
@@ -1005,7 +1011,7 @@ export async function completeAiRequest(input: {
 export async function saveMarketplaceListing(
   record: MarketplaceListingRecord
 ): Promise<MarketplaceListingRecord> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `
       insert into app_marketplace_listings (
@@ -1047,7 +1053,7 @@ export async function listMarketplaceListings(filter?: {
   postedBy?: string;
   status?: MarketplaceListingRecord["status"];
 }): Promise<MarketplaceListingRecord[]> {
-  const db = getPool();
+  const db = requirePool();
   const where: string[] = [];
   const params: string[] = [];
 
@@ -1077,7 +1083,7 @@ export async function getDirectChatThreadByUsers(input: {
   userA: string;
   userB: string;
 }): Promise<ChatThreadRecord | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const pair = normalizePair(input.userA, input.userB);
   const result = await db.query(
     `
@@ -1095,14 +1101,14 @@ export async function getDirectChatThreadByUsers(input: {
 }
 
 export async function getChatThreadById(id: string): Promise<ChatThreadRecord | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query("select * from app_chat_threads where id = $1 limit 1", [id]);
   if (result.rowCount === 0) return undefined;
   return mapChatThread(result.rows[0]);
 }
 
 export async function saveChatThread(record: ChatThreadRecord): Promise<ChatThreadRecord> {
-  const db = getPool();
+  const db = requirePool();
   const pair = normalizePair(record.participantA, record.participantB);
   const result = await db.query(
     `
@@ -1154,7 +1160,7 @@ export async function saveChatThread(record: ChatThreadRecord): Promise<ChatThre
 }
 
 export async function listChatThreadsByUser(userId: string): Promise<ChatThreadRecord[]> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `
       select *
@@ -1168,7 +1174,7 @@ export async function listChatThreadsByUser(userId: string): Promise<ChatThreadR
 }
 
 export async function saveChatMessage(record: ChatMessageRecord): Promise<ChatMessageRecord> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `
       with inserted as (
@@ -1206,7 +1212,7 @@ export async function listChatMessages(input: {
   threadId: string;
   limit?: number;
 }): Promise<ChatMessageRecord[]> {
-  const db = getPool();
+  const db = requirePool();
   const safeLimit = Number.isFinite(input.limit) ? Math.max(1, Math.min(200, Math.floor(input.limit!))) : 80;
   const result = await db.query(
     `
@@ -1226,7 +1232,7 @@ export async function listChatMessages(input: {
 }
 
 export async function countUnreadMessages(userId: string, since: string): Promise<number> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `
       select count(*)::int as count
@@ -1242,7 +1248,7 @@ export async function countUnreadMessages(userId: string, since: string): Promis
 }
 
 export async function hasProcessedWebhookKey(key: string): Promise<boolean> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     "select 1 from app_processed_keys where key_type = 'webhook' and key_value = $1 limit 1",
     [key]
@@ -1251,7 +1257,7 @@ export async function hasProcessedWebhookKey(key: string): Promise<boolean> {
 }
 
 export async function markWebhookKeyProcessed(key: string): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     "insert into app_processed_keys (key_type, key_value) values ('webhook', $1) on conflict do nothing",
     [key]
@@ -1259,7 +1265,7 @@ export async function markWebhookKeyProcessed(key: string): Promise<void> {
 }
 
 export async function hasProcessedEventId(eventId: string): Promise<boolean> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     "select 1 from app_processed_keys where key_type = 'event' and key_value = $1 limit 1",
     [eventId]
@@ -1268,7 +1274,7 @@ export async function hasProcessedEventId(eventId: string): Promise<boolean> {
 }
 
 export async function markEventIdProcessed(eventId: string): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     "insert into app_processed_keys (key_type, key_value) values ('event', $1) on conflict do nothing",
     [eventId]
@@ -1288,7 +1294,7 @@ export async function addAuditEvent(
     metadata: event.metadata
   };
 
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `
       insert into app_audit_events (id, action, target_type, target_id, actor, metadata, created_at)
@@ -1301,14 +1307,14 @@ export async function addAuditEvent(
 }
 
 export async function listAuditEvents(limit = 200): Promise<AuditEvent[]> {
-  const db = getPool();
+  const db = requirePool();
   const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(1000, Math.floor(limit))) : 200;
   const result = await db.query("select * from app_audit_events order by created_at desc limit $1", [safeLimit]);
   return result.rows.map((row) => mapAuditEvent(row));
 }
 
 export async function upsertUserAccount(input: UpsertUserInput): Promise<UserAccountRecord> {
-  const db = getPool();
+  const db = requirePool();
   const email = input.email.trim().toLowerCase();
   const result = await db.query(
     `
@@ -1352,14 +1358,14 @@ export async function upsertUserAccount(input: UpsertUserInput): Promise<UserAcc
 }
 
 export async function getUserByEmail(email: string): Promise<UserAccountRecord | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query("select * from app_users where lower(email) = lower($1) limit 1", [email.trim()]);
   if (result.rowCount === 0) return undefined;
   return mapUser(result.rows[0]);
 }
 
 export async function getUserById(userId: string): Promise<UserAccountRecord | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query("select * from app_users where id = $1 limit 1", [userId]);
   if (result.rowCount === 0) return undefined;
   return mapUser(result.rows[0]);
@@ -1381,7 +1387,7 @@ export async function listUsers(filter?: {
     }
   >
 > {
-  const db = getPool();
+  const db = requirePool();
   const where: string[] = [];
   const params: Array<string | number> = [];
 
@@ -1437,7 +1443,7 @@ export async function listUsers(filter?: {
 }
 
 export async function setUserVipStatus(userId: string, isVip: boolean): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     "update app_users set is_vip = $2, updated_at = $3 where id = $1",
     [userId, isVip, new Date().toISOString()]
@@ -1445,7 +1451,7 @@ export async function setUserVipStatus(userId: string, isVip: boolean): Promise<
 }
 
 export async function getUserVipStatus(userId: string): Promise<boolean> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query("select is_vip from app_users where id = $1 limit 1", [userId]);
   return Boolean(result.rows[0]?.is_vip);
 }
@@ -1459,7 +1465,7 @@ export async function issueActivityCredits(input: {
   const now = new Date().toISOString();
   // Idempotency: only one reward per type (except generic activity_reward)
   if (input.type !== "activity_reward") {
-    const db = getPool();
+    const db = requirePool();
     const existing = await db.query(
       "select 1 from app_credit_transactions where user_id = $1 and type = $2 limit 1",
       [input.userId, input.type]
@@ -1489,7 +1495,7 @@ export async function updateUserById(input: {
   verificationStatus?: UserAccountRecord["verificationStatus"];
   isVip?: boolean;
 }): Promise<UserAccountRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const sets = ["updated_at = $2"];
   const params: Array<string | boolean | null> = [input.userId, new Date().toISOString()];
 
@@ -1557,7 +1563,7 @@ export async function deleteUserById(input: {
   userId: string;
   removedBy: string;
 }): Promise<UserAccountRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const client = await db.connect();
   let removed: UserAccountRecord | null = null;
 
@@ -1623,7 +1629,7 @@ export async function setUserRoleAndAccessByEmail(input: {
   website?: string;
   annualRevenue?: string;
 }): Promise<UserAccountRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `
       update app_users
@@ -1652,7 +1658,7 @@ export async function createMagicLink(input: {
   requestedIp?: string;
   requestedUserAgent?: string;
 }): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `
       insert into app_magic_links (
@@ -1675,7 +1681,7 @@ export async function createMagicLink(input: {
 }
 
 export async function consumeMagicLink(tokenHash: string, consumedAt: string): Promise<UserAccountRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `
       with claimed as (
@@ -1714,7 +1720,7 @@ export async function listMagicLinksByUserId(input: {
     requestedUserAgent?: string;
   }>
 > {
-  const db = getPool();
+  const db = requirePool();
   const safeLimit = Number.isFinite(input.limit) ? Math.max(1, Math.min(300, Math.floor(input.limit!))) : 50;
   const result = await db.query(
     `
@@ -1748,7 +1754,7 @@ export async function createSession(input: {
   ip?: string;
   userAgent?: string;
 }): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `
       insert into app_sessions (
@@ -1762,7 +1768,7 @@ export async function createSession(input: {
 }
 
 export async function getSessionByToken(token: string): Promise<SessionUserRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const hashed = shaToken(token);
   const now = new Date().toISOString();
   const result = await db.query(
@@ -1799,7 +1805,7 @@ export async function getSessionByToken(token: string): Promise<SessionUserRecor
 }
 
 export async function revokeSessionByToken(token: string, revokedAt: string): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `
       update app_sessions
@@ -1815,7 +1821,7 @@ export async function getNetworkGraph(input: {
   userId: string;
   limit?: number;
 }): Promise<{ nodes: NetworkGraphNode[]; edges: NetworkGraphEdge[] }> {
-  const db = getPool();
+  const db = requirePool();
   const safeLimit = Number.isFinite(input.limit) ? Math.max(6, Math.min(80, Math.floor(input.limit!))) : 28;
 
   const nodeResult = await db.query(
@@ -1936,7 +1942,7 @@ export async function savePitch(pitch: {
   title: string; summary: string; deckUrl?: string; ask: string;
   creditsCharged: number; createdAt: string;
 }): Promise<{ id: string; senderId: string; recipientId: string; title: string; summary: string; deckUrl?: string; ask: string; status: string; creditsCharged: number; createdAt: string; updatedAt: string; }> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `INSERT INTO pitches (id, sender_id, recipient_id, title, summary, deck_url, ask, status, credits_charged, created_at, updated_at)
      VALUES ($1,$2,$3,$4,$5,$6,$7,'pending',$8,$9,$9)
@@ -1948,7 +1954,7 @@ export async function savePitch(pitch: {
 }
 
 export async function listPitchesByRecipient(recipientId: string): Promise<Array<{ id: string; senderId: string; senderName?: string; senderCompany?: string; title: string; summary: string; ask: string; status: string; creditsCharged: number; createdAt: string; }>> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `SELECT p.*, u.display_name as sender_name, u.company_name as sender_company
      FROM pitches p
@@ -1961,7 +1967,7 @@ export async function listPitchesByRecipient(recipientId: string): Promise<Array
 }
 
 export async function getPitchById(id: string): Promise<{ id: string; senderId: string; recipientId: string; status: string } | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(`SELECT id, sender_id, recipient_id, status FROM pitches WHERE id=$1`, [id]);
   if (!result.rows[0]) return undefined;
   const r = result.rows[0];
@@ -1969,19 +1975,19 @@ export async function getPitchById(id: string): Promise<{ id: string; senderId: 
 }
 
 export async function updatePitchStatus(id: string, status: 'accepted' | 'declined'): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(`UPDATE pitches SET status=$1, updated_at=NOW() WHERE id=$2`, [status, id]);
 }
 
 export async function countPendingPitches(recipientId: string): Promise<number> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(`SELECT COUNT(*)::int as count FROM pitches WHERE recipient_id=$1 AND status='pending'`, [recipientId]);
   return result.rows[0]?.count ?? 0;
 }
 
 // Increment signal score by delta, capped at 100
 export async function incrementSignalScore(userId: string, delta: number): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `update app_users
      set signal_score = least(100, signal_score + $2), updated_at = $3
@@ -1992,7 +1998,7 @@ export async function incrementSignalScore(userId: string, delta: number): Promi
 
 // Recalculate trust score from profile completeness + verification status
 export async function recalculateTrustScore(userId: string): Promise<number> {
-  const db = getPool();
+  const db = requirePool();
   const res = await db.query(
     "select display_name, company_name, avatar_url, verification_status, trust_score from app_users where id = $1",
     [userId]
@@ -2023,7 +2029,7 @@ export async function recalculateTrustScore(userId: string): Promise<number> {
 
 // Add trust bonus (for events like accepted intro, accepted pitch)
 export async function addTrustBonus(userId: string, bonus: number): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `update app_users
      set trust_score = least(100, trust_score + $2), updated_at = $3
@@ -2034,7 +2040,7 @@ export async function addTrustBonus(userId: string, bonus: number): Promise<void
 
 // Record a profile view for a VIP user and return new count (for milestone credit checks)
 export async function recordProfileView(viewedUserId: string): Promise<number> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     `update app_users
      set profile_view_count = profile_view_count + 1
@@ -2047,7 +2053,7 @@ export async function recordProfileView(viewedUserId: string): Promise<number> {
 }
 
 export async function getProfileViewCount(userId: string): Promise<number> {
-  const db = getPool();
+  const db = requirePool();
   const result = await db.query(
     "select profile_view_count from app_users where id = $1",
     [userId]
@@ -2080,7 +2086,7 @@ function mapEvent(row: Record<string, unknown>): EventRecord {
 }
 
 export async function saveEvent(record: EventRecord): Promise<EventRecord> {
-  const db = getPool();
+  const db = requirePool();
   const now = new Date().toISOString();
   await db.query(
     `insert into app_events (id, posted_by, title, topic, description, location, address, link, date_time, end_time, price, currency, max_attendees, status, created_at, updated_at)
@@ -2103,7 +2109,7 @@ export async function saveEvent(record: EventRecord): Promise<EventRecord> {
 }
 
 export async function listEvents(filter?: { status?: string; postedBy?: string }): Promise<EventRecord[]> {
-  const db = getPool();
+  const db = requirePool();
   const conditions: string[] = [];
   const params: unknown[] = [];
   if (filter?.status) { params.push(filter.status); conditions.push(`e.status = $${params.length}`); }
@@ -2119,7 +2125,7 @@ export async function listEvents(filter?: { status?: string; postedBy?: string }
 }
 
 export async function getEventById(id: string): Promise<(EventRecord & { attendees: EventAttendee[] }) | undefined> {
-  const db = getPool();
+  const db = requirePool();
   const res = await db.query(
     `select e.*, u.display_name as posted_by_name, u.avatar_url as posted_by_avatar_url,
      (select count(*) from app_event_rsvps r where r.event_id = e.id)::int as rsvp_count
@@ -2144,7 +2150,7 @@ export async function getEventById(id: string): Promise<(EventRecord & { attende
 }
 
 export async function cancelEvent(id: string, userId: string): Promise<EventRecord | null> {
-  const db = getPool();
+  const db = requirePool();
   const res = await db.query(
     `update app_events set status = 'cancelled', updated_at = $3 where id = $1 and posted_by = $2 returning *`,
     [id, userId, new Date().toISOString()]
@@ -2154,7 +2160,7 @@ export async function cancelEvent(id: string, userId: string): Promise<EventReco
 }
 
 export async function rsvpEvent(eventId: string, userId: string, rsvpId: string): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `insert into app_event_rsvps (id, event_id, user_id, created_at) values ($1,$2,$3,$4) on conflict (event_id, user_id) do nothing`,
     [rsvpId, eventId, userId, new Date().toISOString()]
@@ -2162,18 +2168,18 @@ export async function rsvpEvent(eventId: string, userId: string, rsvpId: string)
 }
 
 export async function cancelRsvp(eventId: string, userId: string): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(`delete from app_event_rsvps where event_id = $1 and user_id = $2`, [eventId, userId]);
 }
 
 export async function getUserRsvp(eventId: string, userId: string): Promise<boolean> {
-  const db = getPool();
+  const db = requirePool();
   const res = await db.query(`select 1 from app_event_rsvps where event_id = $1 and user_id = $2`, [eventId, userId]);
   return (res.rowCount ?? 0) > 0;
 }
 
 export async function getUsersByIndustry(industry: string): Promise<Array<{ companyName?: string; displayName?: string; industry?: string }>> {
-  const db = getPool();
+  const db = requirePool();
   const res = await db.query(
     `select display_name, company_name, industry from app_users
      where lower(industry) = lower($1) and role != 'applicant' and role != 'public_visitor'
@@ -2196,7 +2202,7 @@ function generateReferralCode(userId: string): string {
 }
 
 export async function getOrCreateReferralCode(userId: string, isVip: boolean): Promise<{ code: string; uses: number }> {
-  const db = getPool();
+  const db = requirePool();
   const existing = await db.query(`select code, uses from app_referrals where user_id = $1`, [userId]);
   if (existing.rowCount && existing.rowCount > 0) {
     return { code: String(existing.rows[0].code), uses: Number(existing.rows[0].uses) };
@@ -2212,7 +2218,7 @@ export async function getOrCreateReferralCode(userId: string, isVip: boolean): P
 }
 
 export async function applyReferralCode(code: string, newUserId: string): Promise<{ referrerId: string; referrerReward: number; newUserReward: number } | null> {
-  const db = getPool();
+  const db = requirePool();
   // Check if already used a referral code
   const alreadyUsed = await db.query(`select 1 from app_referral_uses where used_by = $1`, [newUserId]);
   if (alreadyUsed.rowCount && alreadyUsed.rowCount > 0) return null;
@@ -2238,18 +2244,18 @@ export async function applyReferralCode(code: string, newUserId: string): Promis
 // ── Elite Circle ───────────────────────────────────────────────
 
 export async function setUserEliteStatus(userId: string, isElite: boolean): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(`update app_users set is_elite = $2, updated_at = now() where id = $1`, [userId, isElite]);
 }
 
 export async function getUserEliteStatus(userId: string): Promise<boolean> {
-  const db = getPool();
+  const db = requirePool();
   const res = await db.query(`select is_elite from app_users where id = $1`, [userId]);
   return Boolean(res.rows[0]?.is_elite);
 }
 
 export async function listEliteMembers(): Promise<UserAccountRecord[]> {
-  const db = getPool();
+  const db = requirePool();
   const res = await db.query(
     `select * from app_users where is_elite = true order by display_name asc`
   );
@@ -2257,7 +2263,7 @@ export async function listEliteMembers(): Promise<UserAccountRecord[]> {
 }
 
 export async function saveEliteMessage(msg: { id: string; userId: string; displayName?: string; avatarUrl?: string; content: string }): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(
     `insert into app_elite_messages (id, user_id, display_name, avatar_url, content, created_at)
      values ($1,$2,$3,$4,$5,now())`,
@@ -2266,7 +2272,7 @@ export async function saveEliteMessage(msg: { id: string; userId: string; displa
 }
 
 export async function listEliteMessages(limit = 100): Promise<Array<{ id: string; userId: string; displayName?: string; avatarUrl?: string; content: string; createdAt: string }>> {
-  const db = getPool();
+  const db = requirePool();
   const res = await db.query(
     `select id, user_id, display_name, avatar_url, content, created_at from app_elite_messages order by created_at asc limit $1`,
     [limit]
@@ -2282,6 +2288,6 @@ export async function listEliteMessages(limit = 100): Promise<Array<{ id: string
 }
 
 export async function deleteEliteMessagesBefore(cutoffIso: string): Promise<void> {
-  const db = getPool();
+  const db = requirePool();
   await db.query(`delete from app_elite_messages where created_at < $1::timestamptz`, [cutoffIso]);
 }

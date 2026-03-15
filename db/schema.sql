@@ -285,3 +285,54 @@ create table audit_logs (
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
+
+-- News
+create table if not exists app_news (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  image_url text,
+  source_name text,
+  url text,
+  published_at timestamptz,
+  category text default 'general',
+  is_google boolean not null default false,
+  notion_id text,
+  created_at timestamptz not null default now()
+);
+
+-- Deal Rooms
+create table if not exists app_deal_rooms (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  status text not null default 'open',
+  created_by text not null,
+  deal_value numeric(15,2),
+  currency text default 'EUR',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists app_deal_room_members (
+  id uuid primary key default gen_random_uuid(),
+  room_id uuid not null references app_deal_rooms(id) on delete cascade,
+  user_id text not null,
+  display_name text,
+  avatar_url text,
+  role text not null default 'collaborator',
+  joined_at timestamptz not null default now(),
+  unique(room_id, user_id)
+);
+
+create table if not exists app_deal_room_messages (
+  id uuid primary key default gen_random_uuid(),
+  room_id uuid not null references app_deal_rooms(id) on delete cascade,
+  user_id text not null,
+  display_name text,
+  avatar_url text,
+  content text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists app_deal_room_messages_room_idx on app_deal_room_messages(room_id, created_at asc);

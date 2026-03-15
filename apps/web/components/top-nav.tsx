@@ -144,6 +144,8 @@ export function TopNav() {
     { href: "/marketplace", label: t("nav.market"),    mobile: t("nav.marketMobile") },
     { href: "/pitches",     label: t("nav.pitches"),   mobile: t("nav.pitchesMobile") },
     { href: "/events",      label: t("nav.events"),    mobile: t("nav.eventsMobile") },
+    { href: "/news",        label: t("nav.news"),      mobile: t("nav.newsMobile") },
+    { href: "/deal-room",   label: t("nav.dealRooms"), mobile: t("nav.dealRoomsMobile") },
   ];
 
   const baseExtraLinksLoggedOut = [
@@ -547,7 +549,7 @@ export function TopNav() {
 
       {/* ── Mobile Bottom Nav ─────────────────────────────────── */}
       <nav
-        className="fixed bottom-3 left-3 right-3 z-40 grid grid-cols-7 gap-0.5 rounded-[1rem] px-1 py-1.5 lg:hidden"
+        className="fixed bottom-3 left-3 right-3 z-40 grid grid-cols-9 gap-0.5 rounded-[1rem] px-1 py-1.5 lg:hidden"
         style={{
           background: "rgba(14, 13, 11, 0.88)",
           border: "1px solid rgba(196,151,58,0.15)",

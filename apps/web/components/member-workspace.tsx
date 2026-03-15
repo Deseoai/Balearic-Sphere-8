@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiBaseUrl, clearSessionToken, getJson, getSessionToken, postJson, setSessionToken } from "../lib/api";
+import { useLang } from "../lib/i18n";
 import { AiToolsPanel } from "./ai-tools-panel";
 
 type AuthUser = {
@@ -84,9 +85,10 @@ const G = {
 };
 
 export function MemberWorkspace() {
+  const { t } = useLang();
   const [loading, setLoading]     = useState(true);
   const [busy, setBusy]           = useState(false);
-  const [statusLine, setStatusLine] = useState("Preparing your workspace…");
+  const [statusLine, setStatusLine] = useState("");
   const [errorLine, setErrorLine] = useState<string | null>(null);
 
   const [me, setMe]               = useState<AuthUser | null>(null);
@@ -233,7 +235,7 @@ export function MemberWorkspace() {
   if (loading) {
     return (
       <section className="surface-stage mt-4 rounded-[1.8rem] p-8 text-center">
-        <p className="text-sm" style={{ color: G.muted }}>Entering your private workspace…</p>
+        <p className="text-sm" style={{ color: G.muted }}>{t("workspace.loadingWorkspace")}</p>
       </section>
     );
   }
@@ -245,7 +247,7 @@ export function MemberWorkspace() {
         {/* Left: form */}
         <section className="surface-stage rounded-[1.8rem] p-7 sm:p-10">
           <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>
-            Private Entry
+            {t("workspace.eyebrow")}
           </p>
           <h1
             className="mt-4 leading-[1.05]"
@@ -281,7 +283,7 @@ export function MemberWorkspace() {
               disabled={busy}
               className="btn-primary premium-button px-6 py-2.5 text-sm rounded-xl"
             >
-              {busy ? "Sending link…" : "Send Magic Link"}
+              {busy ? t("common.loading") : "Send Magic Link"}
             </button>
             <a href="mailto:management@balea-sphere8.com" className="btn-quiet px-5 py-2.5 text-sm">
               Contact Support
@@ -327,12 +329,12 @@ export function MemberWorkspace() {
       <section className="surface-stage rounded-[1.8rem] p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>Member Workspace</p>
+            <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: G.gold }}>{t("workspace.eyebrow")}</p>
             <h1
               className="mt-3 leading-tight"
               style={{ fontFamily: G.display, fontSize: "clamp(2rem,4vw,2.8rem)", color: G.champagne }}
             >
-              Good to see you,<br />{displayName(me)}
+              {t("workspace.welcomeBack")},<br />{displayName(me)}
             </h1>
             <p className="mt-2 max-w-2xl text-sm" style={{ color: G.muted }}>
               Your private command centre. Introductions, conversations, opportunities, and credits — all in one calm place.
@@ -343,7 +345,7 @@ export function MemberWorkspace() {
             disabled={busy}
             className="btn-quiet rounded-xl px-4 py-2 text-sm"
           >
-            Sign Out
+            {t("nav.signOut")}
           </button>
         </div>
 
@@ -379,7 +381,7 @@ export function MemberWorkspace() {
 
       {/* Next Best Move */}
       <section className="surface-elevated rounded-[1.6rem] p-6 sm:p-7">
-        <p className="text-[10px] uppercase tracking-[0.28em]" style={{ color: G.muted }}>Your Next Move</p>
+        <p className="text-[10px] uppercase tracking-[0.28em]" style={{ color: G.muted }}>{t("workspace.quickActions")}</p>
         <h2
           className="mt-2 leading-tight"
           style={{ fontFamily: G.display, fontSize: "clamp(1.6rem,3vw,2.2rem)", color: G.champagne }}
@@ -391,8 +393,8 @@ export function MemberWorkspace() {
           <Link href={nextMove.ctaHref} className="btn-primary premium-button rounded-xl px-6 py-2.5 text-sm">
             {nextMove.ctaLabel}
           </Link>
-          <Link href="/network" className="btn-quiet rounded-xl px-5 py-2.5 text-sm">Open Network</Link>
-          <Link href="/messages" className="btn-quiet rounded-xl px-5 py-2.5 text-sm">Messages</Link>
+          <Link href="/network" className="btn-quiet rounded-xl px-5 py-2.5 text-sm">{t("workspace.viewNetwork")}</Link>
+          <Link href="/messages" className="btn-quiet rounded-xl px-5 py-2.5 text-sm">{t("nav.messages")}</Link>
         </div>
       </section>
 
@@ -556,7 +558,7 @@ export function MemberWorkspace() {
       {/* Credits + Quick Actions */}
       <section className="grid gap-4 lg:grid-cols-3">
         <article className="surface-elevated rounded-[1.4rem] p-5">
-          <p className="text-[10px] uppercase tracking-[0.24em]" style={{ color: G.muted }}>Balance</p>
+          <p className="text-[10px] uppercase tracking-[0.24em]" style={{ color: G.muted }}>{t("workspace.yourCredits")}</p>
           <p
             className="mt-2 font-semibold"
             style={{ fontFamily: G.display, fontSize: "3rem", color: G.champagne, lineHeight: 1 }}
@@ -580,7 +582,7 @@ export function MemberWorkspace() {
         </article>
 
         <article className="surface-elevated rounded-[1.4rem] p-5 lg:col-span-2">
-          <p className="text-[10px] uppercase tracking-[0.24em]" style={{ color: G.muted }}>Quick Access</p>
+          <p className="text-[10px] uppercase tracking-[0.24em]" style={{ color: G.muted }}>{t("workspace.quickActions")}</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {[
               { href: "/network",    title: "Network Map",      desc: "Discover members. Unlock introductions." },
@@ -607,7 +609,7 @@ export function MemberWorkspace() {
         {/* Suggested Members */}
         <article className="surface-elevated rounded-[1.4rem] p-5">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] uppercase tracking-[0.20em]" style={{ color: G.muted }}>Suggested Members</p>
+            <p className="text-[10px] uppercase tracking-[0.20em]" style={{ color: G.muted }}>{t("workspace.viewNetwork")}</p>
             <Link href="/network" className="text-xs underline" style={{ color: G.gold }}>View map</Link>
           </div>
           <div className="mt-3 space-y-2">
@@ -630,7 +632,7 @@ export function MemberWorkspace() {
               </div>
             ))}
             {networkUsers.length === 0 && (
-              <p className="text-xs" style={{ color: G.muted }}>Sign in to see map suggestions.</p>
+              <p className="text-xs" style={{ color: G.muted }}>{t("workspace.signInPrompt")}</p>
             )}
           </div>
         </article>
@@ -638,7 +640,7 @@ export function MemberWorkspace() {
         {/* Conversations */}
         <article className="surface-elevated rounded-[1.4rem] p-5">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] uppercase tracking-[0.20em]" style={{ color: G.muted }}>Recent Conversations</p>
+            <p className="text-[10px] uppercase tracking-[0.20em]" style={{ color: G.muted }}>{t("workspace.recentActivity")}</p>
             <Link href="/messages" className="text-xs underline" style={{ color: G.gold }}>Open</Link>
           </div>
           <div className="mt-3 space-y-2">
@@ -657,7 +659,7 @@ export function MemberWorkspace() {
               </div>
             ))}
             {threads.length === 0 && (
-              <p className="text-xs" style={{ color: G.muted }}>No conversations yet. Unlock a contact from the network map.</p>
+              <p className="text-xs" style={{ color: G.muted }}>{t("workspace.noRecentActivity")}</p>
             )}
           </div>
         </article>
@@ -665,7 +667,7 @@ export function MemberWorkspace() {
         {/* Marketplace Highlights */}
         <article className="surface-elevated rounded-[1.4rem] p-5">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] uppercase tracking-[0.20em]" style={{ color: G.muted }}>Marketplace</p>
+            <p className="text-[10px] uppercase tracking-[0.20em]" style={{ color: G.muted }}>{t("workspace.viewMarketplace")}</p>
             <Link href="/marketplace" className="text-xs underline" style={{ color: G.gold }}>Browse</Link>
           </div>
           <div className="mt-3 space-y-2">
@@ -683,7 +685,7 @@ export function MemberWorkspace() {
               </div>
             ))}
             {listings.length === 0 && (
-              <p className="text-xs" style={{ color: G.muted }}>No curated listings yet.</p>
+              <p className="text-xs" style={{ color: G.muted }}>{t("common.noResults")}</p>
             )}
           </div>
         </article>

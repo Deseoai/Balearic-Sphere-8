@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getJson, getSessionToken, postJson } from "../lib/api";
+import { useLang } from "../lib/i18n";
 
 type AuthUser = { userId: string; email: string; displayName?: string; accessLevel: string; isVip?: boolean; };
 type GraphNode = {
@@ -109,6 +110,7 @@ function EdgeParticle({ srcX, srcY, tgtX, tgtY, color, delay, duration }: {
 }
 
 export function NetworkMapHub() {
+  const { t } = useLang();
   const router = useRouter();
 
   const [loading, setLoading]         = useState(true);
@@ -469,7 +471,7 @@ export function NetworkMapHub() {
         className="absolute bottom-3 right-3 z-20 rounded-xl px-3 py-1.5 text-xs transition-colors"
         style={{ background: "rgba(14,13,11,0.88)", border: "1px solid rgba(196,151,58,0.22)", color: "var(--text-secondary)", backdropFilter: "blur(8px)" }}
       >
-        {fullscreen ? "⊠ Exit" : "⊡ Expand"}
+        {fullscreen ? `⊠ ${t("networkMap.exitFullscreen")}` : `⊡ ${t("networkMap.fullscreen")}`}
       </button>
 
       {/* Node count + live indicator */}
@@ -494,7 +496,7 @@ export function NetworkMapHub() {
     return (
       <section className="surface-stage rounded-[1.8rem] p-8 text-center">
         <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.8 }}>
-          <p className="text-sm" style={{ color: G.muted }}>Connecting to your private network…</p>
+          <p className="text-sm" style={{ color: G.muted }}>{t("networkMap.loadingGraph")}</p>
         </motion.div>
       </section>
     );
@@ -506,7 +508,7 @@ export function NetworkMapHub() {
       <section className="surface-stage rounded-[1.8rem] p-7 sm:p-9">
         <p className="text-[10px] uppercase tracking-[0.32em]" style={{ color: G.gold }}>Network</p>
         <h1 className="mt-3" style={{ fontFamily: G.display, fontSize: "clamp(2rem,4vw,2.8rem)", color: G.champagne }}>Your private business network</h1>
-        <p className="mt-2 max-w-xl text-sm" style={{ color: G.muted }}>Sign in from Workspace to discover and connect with verified members of your circle.</p>
+        <p className="mt-2 max-w-xl text-sm" style={{ color: G.muted }}>{t("networkMap.signInPrompt")}</p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Link href="/workspace" className="btn-primary premium-button rounded-xl px-6 py-2.5 text-sm">Open Workspace</Link>
           <a href="mailto:management@balea-sphere8.com" className="btn-quiet rounded-xl px-5 py-2.5 text-sm">Contact Support</a>
@@ -538,7 +540,7 @@ export function NetworkMapHub() {
             >
               {liveMode ? "● Live" : "○ Live"}
             </button>
-            <button onClick={() => void refreshGraph()} className="btn-quiet rounded-full px-3 py-1.5 text-xs">Refresh</button>
+            <button onClick={() => void refreshGraph()} className="btn-quiet rounded-full px-3 py-1.5 text-xs">{t("common.refresh")}</button>
           </div>
         </div>
         <p className="mt-3 text-xs" style={{ color: G.muted }}>{statusLine}</p>
@@ -605,12 +607,12 @@ export function NetworkMapHub() {
                       style={{ background: "rgba(212,168,74,0.15)", border: "1px solid rgba(212,168,74,0.45)", color: "#D4A84A" }}>VIP</span>
                   )}
                   {selectedNode.verification === "verified" && (
-                    <span className="status-chip status-accepted text-[9px]">Verified</span>
+                    <span className="status-chip status-accepted text-[9px]">{t("networkMap.verified")}</span>
                   )}
                   {selectedNode.targetUserId && sentIntros.has(selectedNode.targetUserId) && (
                     <span className="rounded-full px-2.5 py-0.5 text-[9px] font-semibold"
                       style={{ background: "rgba(76,175,125,0.12)", border: "1px solid rgba(76,175,125,0.30)", color: "#4CAF7D" }}>
-                      Intro sent ✓
+                      {t("networkMap.introSent")}
                     </span>
                   )}
                 </div>
@@ -647,7 +649,7 @@ export function NetworkMapHub() {
               </div>
 
               <button onClick={() => setDetailOpen(true)} className="btn-quiet w-full rounded-xl px-4 py-2.5 text-sm">
-                View Full Profile
+                {t("networkMap.viewProfile")}
               </button>
 
               {unlockableNode && (
@@ -669,7 +671,7 @@ export function NetworkMapHub() {
                   <button onClick={() => void unlockContact()} disabled={busy}
                     className="btn-primary premium-button w-full rounded-xl px-4 py-3 text-sm disabled:opacity-50"
                     style={{ background: "linear-gradient(135deg, #9E7428, #C4973A, #D4A84A)" }}>
-                    {busy ? "Sending…" : `Send Introduction — ${introCost} credits`}
+                    {busy ? t("networkMap.introSending") : `${t("networkMap.sendIntro")} — ${introCost} credits`}
                   </button>
                 </>
               )}
@@ -694,10 +696,10 @@ export function NetworkMapHub() {
           >
             <div className="flex h-full flex-col gap-3">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium" style={{ color: G.champagne }}>Network Map — Full Screen</p>
+                <p className="text-sm font-medium" style={{ color: G.champagne }}>{t("networkMap.fullscreen")}</p>
                 <div className="flex gap-2">
-                  <button onClick={() => void refreshGraph()} className="btn-quiet rounded-full px-3 py-1 text-xs">Refresh</button>
-                  <button onClick={() => setFullscreen(false)} className="btn-quiet rounded-full px-3 py-1 text-xs">Close ✕</button>
+                  <button onClick={() => void refreshGraph()} className="btn-quiet rounded-full px-3 py-1 text-xs">{t("common.refresh")}</button>
+                  <button onClick={() => setFullscreen(false)} className="btn-quiet rounded-full px-3 py-1 text-xs">{t("common.close")} ✕</button>
                 </div>
               </div>
               <div className="flex-1 min-h-0">{mapScene("h-full")}</div>
@@ -710,7 +712,7 @@ export function NetworkMapHub() {
                       <p className="text-xs truncate" style={{ color: G.muted }}>{selectedNode.industry?.replaceAll("_", " ") ?? ""}</p>
                     </div>
                     <button onClick={() => { setFullscreen(false); setDetailOpen(true); }} className="btn-quiet rounded-xl px-3 py-1.5 text-xs shrink-0">
-                      View Profile
+                      {t("networkMap.viewProfile")}
                     </button>
                   </div>
                 </div>
@@ -744,7 +746,7 @@ export function NetworkMapHub() {
                           style={{ background: "rgba(212,168,74,0.15)", border: "1px solid rgba(212,168,74,0.45)", color: "#D4A84A" }}>VIP</span>
                       )}
                       {selectedNode.verification === "verified" && (
-                        <span className="status-chip status-accepted text-[9px]">Verified</span>
+                        <span className="status-chip status-accepted text-[9px]">{t("networkMap.verified")}</span>
                       )}
                       {selectedNode.targetUserId && sentIntros.has(selectedNode.targetUserId) && (
                         <span className="rounded-full px-2.5 py-0.5 text-[9px] font-semibold"
@@ -754,7 +756,7 @@ export function NetworkMapHub() {
                     <h3 style={{ fontFamily: G.display, fontSize: "1.6rem", color: G.champagne, lineHeight: 1.15 }}>{displayName(selectedNode)}</h3>
                   </div>
                 </div>
-                <button onClick={() => setDetailOpen(false)} className="btn-quiet rounded-full px-3 py-1.5 text-xs flex-shrink-0">Close</button>
+                <button onClick={() => setDetailOpen(false)} className="btn-quiet rounded-full px-3 py-1.5 text-xs flex-shrink-0">{t("common.close")}</button>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-4">
@@ -814,7 +816,7 @@ export function NetworkMapHub() {
                   className="btn-primary premium-button w-full rounded-xl px-4 py-3 text-sm disabled:opacity-50"
                   style={{ background: "linear-gradient(135deg, #9E7428, #C4973A, #D4A84A)" }}
                 >
-                  {busy ? "Sending…" : `Request Introduction — ${introCost} credits`}
+                  {busy ? t("networkMap.introSending") : `${t("networkMap.sendIntro")} — ${introCost} credits`}
                 </button>
               )}
             </motion.section>
@@ -882,7 +884,7 @@ export function NetworkMapHub() {
                     Manage Credits
                   </Link>
                   <button onClick={() => setVaultOpen(false)} className="btn-quiet rounded-xl px-5 py-3 text-sm">
-                    Close
+                    {t("common.close")}
                   </button>
                 </div>
               </div>
@@ -927,7 +929,7 @@ export function NetworkMapHub() {
                   </button>
                 )}
               </div>
-              <button onClick={() => setTopupOpen(false)} disabled={topupBusy} className="btn-quiet mt-4 rounded-full px-5 py-2 text-sm">Cancel</button>
+              <button onClick={() => setTopupOpen(false)} disabled={topupBusy} className="btn-quiet mt-4 rounded-full px-5 py-2 text-sm">{t("common.cancel")}</button>
             </motion.section>
           </motion.div>
         )}

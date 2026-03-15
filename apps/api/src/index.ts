@@ -16,6 +16,8 @@ import { registerEventRoutes } from "./routes/events.js";
 import { registerRewardsRoutes } from "./routes/rewards.js";
 import { registerReferralRoutes } from "./routes/referrals.js";
 import { registerEliteRoutes } from "./routes/elite.js";
+import { registerNewsRoutes } from "./routes/news.js";
+import { registerDealRoomRoutes } from "./routes/dealRoom.js";
 import { registerWebhookRoutes } from "./routes/webhooks.js";
 import { initStore } from "./store/index.js";
 
@@ -57,6 +59,8 @@ await registerRewardsRoutes(app);
 await registerEventRoutes(app);
 await registerReferralRoutes(app);
 await registerEliteRoutes(app);
+await registerNewsRoutes(app);
+await registerDealRoomRoutes(app);
 
 try {
   await app.listen({

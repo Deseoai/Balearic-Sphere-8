@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getSessionToken, postJson } from "../lib/api";
+import { useLang } from "../lib/i18n";
 
 type ConciergeMessage = { role: "assistant" | "user"; text: string; };
 
@@ -184,6 +185,7 @@ function localFallback(message: string, pathname: string): string {
 }
 
 export function AiConciergeShell() {
+  const { t } = useLang();
   const pathname = usePathname();
   const profile = useMemo(() => routeProfile(pathname), [pathname]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -305,13 +307,13 @@ export function AiConciergeShell() {
               <div className="flex items-center justify-between gap-2">
                 <div>
                   <p className="text-xs font-semibold" style={champagneStyle}>{profile.title}</p>
-                  <p className="mt-0.5 text-[10px]" style={mutedStyle}>AI-powered guidance</p>
+                  <p className="mt-0.5 text-[10px]" style={mutedStyle}>{t("aiConcierge.poweredBy")}</p>
                 </div>
                 <button
                   onClick={() => setDesktopOpen(false)}
                   className="concierge-chip rounded-full px-2.5 py-1 text-[10px]"
                 >
-                  ✕ Collapse
+                  {t("aiConcierge.closeConcierge")}
                 </button>
               </div>
 
@@ -342,7 +344,7 @@ export function AiConciergeShell() {
                     className="rounded-xl px-3 py-2 text-[10px]"
                     style={{ background: "rgba(196,151,58,0.05)", color: "rgba(196,151,58,0.50)" }}
                   >
-                    Concierge is thinking…
+                    {t("aiConcierge.thinking")}
                   </div>
                 )}
                 <div ref={messagesEndRef} />
@@ -353,7 +355,7 @@ export function AiConciergeShell() {
                 <input
                   value={input}
                   onChange={e => setInput(e.target.value)}
-                  placeholder="Ask anything…"
+                  placeholder={t("aiConcierge.inputPlaceholder")}
                   className="field-control text-xs"
                   style={{ fontSize: "0.78rem" }}
                   onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); void ask(input); } }}
@@ -417,7 +419,7 @@ export function AiConciergeShell() {
           onClick={() => setMobileOpen(true)}
           className="concierge-pill px-4 py-2.5 text-xs font-semibold rounded-full"
         >
-          ✦ Concierge
+          ✦ {t("aiConcierge.openConcierge")}
         </button>
       </div>
 
@@ -433,7 +435,7 @@ export function AiConciergeShell() {
               <div className="mx-auto mb-3 h-1 w-10 rounded-full" style={{ background: "rgba(196,151,58,0.35)" }} />
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold" style={champagneStyle}>{profile.title}</p>
-                <button onClick={() => setMobileOpen(false)} className="concierge-chip rounded-full px-2.5 py-1 text-xs">✕</button>
+                <button onClick={() => setMobileOpen(false)} className="concierge-chip rounded-full px-2.5 py-1 text-xs">{t("common.close")}</button>
               </div>
 
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -449,7 +451,7 @@ export function AiConciergeShell() {
                 style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(196,151,58,0.08)" }}
               >
                 {messages.slice(-8).map((m, i) => <Bubble key={`${m.role}-${i}`} msg={m} />)}
-                {busy && <div className="rounded-xl px-3 py-2 text-[10px]" style={{ color: "rgba(196,151,58,0.50)" }}>Thinking…</div>}
+                {busy && <div className="rounded-xl px-3 py-2 text-[10px]" style={{ color: "rgba(196,151,58,0.50)" }}>{t("aiConcierge.thinking")}</div>}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -457,7 +459,7 @@ export function AiConciergeShell() {
                 <input
                   value={input}
                   onChange={e => setInput(e.target.value)}
-                  placeholder="Ask anything…"
+                  placeholder={t("aiConcierge.inputPlaceholder")}
                   className="field-control text-sm"
                   onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); void ask(input); } }}
                 />
