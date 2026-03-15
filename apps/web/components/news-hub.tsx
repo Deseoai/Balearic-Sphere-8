@@ -20,13 +20,6 @@ type NewsItem = {
 function getToken() {
   return typeof window !== "undefined" ? localStorage.getItem("balea_session_token") : null;
 }
-function getSessionUser() {
-  try {
-    const raw = typeof window !== "undefined" ? localStorage.getItem("balea_session_user") : null;
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
 export default function NewsHub() {
   const { t } = useLang();
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -36,8 +29,7 @@ export default function NewsHub() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [addForm, setAddForm] = useState({ title: "", description: "", url: "", imageUrl: "", sourceName: "" });
   const [addLoading, setAddLoading] = useState(false);
-  const sessionUser = getSessionUser();
-  const isAdmin = sessionUser?.role === "admin" || sessionUser?.role === "super_admin";
+  const [isAdmin, setIsAdmin] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   async function loadNews() {
@@ -96,6 +88,13 @@ export default function NewsHub() {
   }
 
   useEffect(() => {
+    const token = getToken();
+    if (token) {
+      fetch(`${API_BASE}/v1/auth/me`, { headers: { "Authorization": `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d?.user?.role === "admin" || d?.user?.role === "super_admin") setIsAdmin(true); })
+        .catch(() => null);
+    }
     loadNews();
     intervalRef.current = setInterval(loadNews, 10 * 60 * 1000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
@@ -107,7 +106,7 @@ export default function NewsHub() {
   }
 
   return (
-    <div className="app-shell py-12 lg:with-ai-rail">
+    <div className="py-8">
       {/* Header */}
       <div className="mb-10">
         <p className="text-[10px] tracking-[0.2em] uppercase text-gold font-display mb-3">{t("news.eyebrow")}</p>

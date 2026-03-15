@@ -37,14 +37,10 @@ type DealMessage = {
   created_at: string;
 };
 
+type SessionUser = { id: string; role: string; displayName?: string; email?: string; avatarUrl?: string };
+
 function getToken() {
   return typeof window !== "undefined" ? localStorage.getItem("balea_session_token") : null;
-}
-function getSessionUser() {
-  try {
-    const raw = typeof window !== "undefined" ? localStorage.getItem("balea_session_user") : null;
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
 }
 
 function authHeaders() {
@@ -75,9 +71,9 @@ export default function DealRoomHub() {
   const [createForm, setCreateForm] = useState({ title: "", description: "", dealValue: "" });
   const [creating, setCreating] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
+  const [me, setMe] = useState<SessionUser | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const sessionUser = getSessionUser();
 
   async function loadRooms() {
     try {
@@ -163,8 +159,15 @@ export default function DealRoomHub() {
   }
 
   useEffect(() => {
-    if (!sessionUser) { setLoading(false); return; }
-    loadRooms();
+    const token = getToken();
+    if (!token) { setLoading(false); return; }
+    fetch(`${API_BASE}/v1/auth/me`, { headers: { "Authorization": `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.user) { setMe(d.user); loadRooms(); }
+        else setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -183,9 +186,9 @@ export default function DealRoomHub() {
     try { return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }); } catch { return ""; }
   }
 
-  if (!sessionUser) {
+  if (!me) {
     return (
-      <div className="app-shell py-20 text-center lg:with-ai-rail">
+      <div className="py-20 text-center">
         <p className="text-muted">{t("dealRoom.signInPrompt")}</p>
       </div>
     );
@@ -193,9 +196,9 @@ export default function DealRoomHub() {
 
   // Detail View
   if (activeRoom) {
-    const isOwner = members.find(m => m.user_id === sessionUser?.id)?.role === "owner";
+    const isOwner = members.find(m => m.user_id === me?.id)?.role === "owner";
     return (
-      <div className="app-shell py-8 lg:with-ai-rail">
+      <div className="py-8">
         <button onClick={() => { setActiveRoom(null); if (pollRef.current) clearInterval(pollRef.current); }} className="btn-quiet text-xs px-4 py-2 mb-6">
           {t("dealRoom.backToRooms")}
         </button>
@@ -267,7 +270,7 @@ export default function DealRoomHub() {
                   <p className="text-muted text-sm text-center py-8">{t("dealRoom.noMessages")}</p>
                 )}
                 {messages.map(msg => {
-                  const isMe = msg.user_id === sessionUser?.id;
+                  const isMe = msg.user_id === me?.id;
                   return (
                     <div key={msg.id} className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}>
                       {msg.avatar_url ? (
@@ -313,7 +316,7 @@ export default function DealRoomHub() {
 
   // List View
   return (
-    <div className="app-shell py-12 lg:with-ai-rail">
+    <div className="py-8">
       {/* Header */}
       <div className="mb-10 flex items-start justify-between flex-wrap gap-4">
         <div>
