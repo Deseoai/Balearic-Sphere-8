@@ -35,10 +35,11 @@ export default function VerifyScreen() {
     setLoading(true);
     setError(null);
     try {
-      // Support both full URL and raw token
+      // Support both full URL and raw token (no URL API — not reliable in RN)
       let finalToken = input;
       if (input.includes("token=")) {
-        finalToken = new URL(input).searchParams.get("token") ?? input;
+        const match = input.match(/[?&]token=([^&\s]+)/);
+        finalToken = match ? decodeURIComponent(match[1]) : input;
       }
       const res = await verifyMagicLink(finalToken);
       await setToken(res.token);
