@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
@@ -47,7 +48,10 @@ async function setupPushNotifications() {
 
   try {
     // Uses Expo Push service — no APNs keys needed, Expo forwards to APNs
-    const pushToken = await Notifications.getExpoPushTokenAsync();
+    // Requires EAS projectId — skip in local dev if not configured
+    const projectId = (Constants.expoConfig?.extra?.eas?.projectId) as string | undefined;
+    if (!projectId || projectId === "REPLACE-WITH-EAS-PROJECT-ID") return;
+    const pushToken = await Notifications.getExpoPushTokenAsync({ projectId });
     await registerPushToken(pushToken.data, "ios");
   } catch {
     // Non-critical — app works fine without push tokens
