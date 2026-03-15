@@ -50,14 +50,6 @@
       "expo-router",
       "expo-font",
       [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#C4973A",
-          "sounds": []
-        }
-      ],
-      [
         "expo-image-picker",
         {
           "photosPermission": "Used to select your profile photo for Balea Sphere.",
@@ -67,11 +59,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "eas": {
-        "projectId": "REPLACE-WITH-EAS-PROJECT-ID"
-      }
     }
   }
 }
