@@ -260,3 +260,16 @@ export const runAiTool = (promptType: string, prompt: string) =>
 
 export const getAiHistory = () =>
   apiFetch<{ items: AiRequest[] }>("/v1/ai/requests");
+
+// Push Notifications
+export const registerPushToken = (deviceToken: string, platform: "ios" | "android") =>
+  apiFetch<{ status: string }>("/v1/push/register", {
+    method: "POST",
+    body: JSON.stringify({ deviceToken, platform }),
+  });
+
+export const unregisterPushToken = (deviceToken: string) =>
+  apiFetch<{ status: string }>("/v1/push/register", {
+    method: "DELETE",
+    body: JSON.stringify({ deviceToken }),
+  });

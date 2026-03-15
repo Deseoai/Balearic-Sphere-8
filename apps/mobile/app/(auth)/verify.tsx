@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,12 +14,21 @@ import { C } from "../../lib/colors";
 import { setToken } from "../../lib/storage";
 
 export default function VerifyScreen() {
+  const { autoToken } = useLocalSearchParams<{ autoToken?: string }>();
   const [token, setTokenInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleVerify() {
-    if (!token.trim()) {
+  // Auto-verify when app was opened via magic link deep link
+  useEffect(() => {
+    if (autoToken) {
+      handleVerify(autoToken);
+    }
+  }, [autoToken]);
+
+  async function handleVerify(raw?: string) {
+    const input = (raw ?? token).trim();
+    if (!input) {
       setError("Please paste your magic link token.");
       return;
     }
@@ -27,11 +36,11 @@ export default function VerifyScreen() {
     setError(null);
     try {
       // Support both full URL and raw token
-      let raw = token.trim();
-      if (raw.includes("token=")) {
-        raw = new URL(raw).searchParams.get("token") ?? raw;
+      let finalToken = input;
+      if (input.includes("token=")) {
+        finalToken = new URL(input).searchParams.get("token") ?? input;
       }
-      const res = await verifyMagicLink(raw);
+      const res = await verifyMagicLink(finalToken);
       await setToken(res.token);
       router.replace("/(app)/workspace");
     } catch {
@@ -39,6 +48,15 @@ export default function VerifyScreen() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (autoToken && loading) {
+    return (
+      <View style={[styles.container, { justifyContent: "center" }]}>
+        <Text style={styles.symbol}>✦</Text>
+        <Text style={styles.title}>Signing you in…</Text>
+      </View>
+    );
   }
 
   return (
@@ -71,7 +89,7 @@ export default function VerifyScreen() {
 
         <TouchableOpacity
           style={[styles.btn, loading && styles.btnDisabled]}
-          onPress={handleVerify}
+          onPress={() => handleVerify()}
           disabled={loading}
         >
           <Text style={styles.btnText}>
@@ -92,6 +110,12 @@ const styles = StyleSheet.create({
   },
   back: { marginBottom: 32 },
   backText: { color: C.subdued, fontSize: 15 },
+  symbol: {
+    fontSize: 36,
+    color: C.goldLight,
+    marginBottom: 16,
+    textAlign: "center",
+  },
   title: {
     fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
     fontSize: 26,

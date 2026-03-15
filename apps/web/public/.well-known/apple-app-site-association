@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "REPLACE-WITH-TEAM-ID.com.baleasphere.app",
+        "paths": ["/verify", "/verify/*"]
+      }
+    ]
+  }
+}

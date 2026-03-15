@@ -8,18 +8,43 @@
     "scheme": "balea",
     "userInterfaceStyle": "dark",
     "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
       "backgroundColor": "#0C0B09"
     },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.baleasphere.app",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "associatedDomains": [
+        "applinks:app.balea-sphere8.com"
+      ],
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used to upload your profile photo to Balea Sphere.",
+        "NSPhotoLibraryUsageDescription": "Used to select your profile photo for Balea Sphere.",
+        "NSPhotoLibraryAddUsageDescription": "Used to save photos from Balea Sphere."
+      }
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0C0B09"
       },
-      "package": "com.baleasphere.app"
+      "package": "com.baleasphere.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "app.balea-sphere8.com",
+              "pathPrefix": "/verify"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
       "expo-router",
@@ -27,12 +52,26 @@
       [
         "expo-notifications",
         {
-          "color": "#C4973A"
+          "icon": "./assets/notification-icon.png",
+          "color": "#C4973A",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Used to select your profile photo for Balea Sphere.",
+          "cameraPermission": "Used to take your profile photo for Balea Sphere."
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE-WITH-EAS-PROJECT-ID"
+      }
     }
   }
 }
