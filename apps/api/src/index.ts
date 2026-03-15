@@ -19,6 +19,8 @@ import { registerEliteRoutes } from "./routes/elite.js";
 import { registerNewsRoutes } from "./routes/news.js";
 import { registerDealRoomRoutes } from "./routes/dealRoom.js";
 import { registerWebhookRoutes } from "./routes/webhooks.js";
+import { registerStripeWebhookRoutes } from "./routes/stripeWebhook.js";
+import { registerPushRoutes } from "./routes/push.js";
 import { initStore } from "./store/index.js";
 
 const app = Fastify({ logger: true, bodyLimit: 5_242_880 }); // 5MB
@@ -53,6 +55,9 @@ await registerAiRoutes(app);
 await registerNetworkRoutes(app);
 await registerAdminRoutes(app);
 await registerWebhookRoutes(app);
+// Stripe webhook: must use app.register() for encapsulated raw body parsing
+await app.register(registerStripeWebhookRoutes);
+await registerPushRoutes(app);
 await registerCallbackRoutes(app);
 await registerPitchRoutes(app);
 await registerRewardsRoutes(app);

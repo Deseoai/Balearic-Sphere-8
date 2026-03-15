@@ -4,12 +4,13 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { env } from "../config.js";
 import { hasMemberWorkspaceAccess, requireMemberWorkspaceAccess, requireSession } from "../lib/authSession.js";
-import { emitEmailAlert, emitEventHub, emitRewardEvent } from "../lib/n8nEvents.js";
+import { emitEmailAlert, emitEventHub, emitPushNotification, emitRewardEvent } from "../lib/n8nEvents.js";
 import {
   addAuditEvent,
   addCreditTransaction,
   getDirectChatThreadByUsers,
   getNetworkGraph,
+  getPushTokensByUserId,
   getUserByEmail,
   getUserById,
   getUserVipStatus,
@@ -274,6 +275,21 @@ export async function registerNetworkRoutes(app: FastifyInstance): Promise<void>
         createdAt
       }
     });
+
+    // Push notification to target user
+    if (resolvedTargetUserId) {
+      const targetTokens = await getPushTokensByUserId(resolvedTargetUserId);
+      if (targetTokens.length > 0) {
+        const senderName = (await getUserById(session.userId))?.displayName ?? session.email;
+        await emitPushNotification({
+          userId: resolvedTargetUserId,
+          title: "New Intro Request",
+          body: `${senderName} wants to connect with you`,
+          deviceTokens: targetTokens.map(t => t.deviceToken),
+          data: { type: "intro_request", introId: introRequestId }
+        }).catch(() => {});
+      }
+    }
 
     // First-intro bonus: 20cr, idempotent via invite_reward type
     const introBonus = await issueActivityCredits({

@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { env } from "../config.js";
 import { hasMemberWorkspaceAccess, requireMemberWorkspaceAccess, requireSession } from "../lib/authSession.js";
-import { emitEmailAlert, emitEventHub } from "../lib/n8nEvents.js";
+import { emitEmailAlert, emitEventHub, emitPushNotification } from "../lib/n8nEvents.js";
 import {
   addCreditTransaction,
   countUnreadMessages,
@@ -13,6 +13,7 @@ import {
   getUserByEmail,
   getUserById,
   getUserVipStatus,
+  getPushTokensByUserId,
   incrementSignalScore,
   listChatMessages,
   listChatThreadsByUser,
@@ -359,6 +360,20 @@ export async function registerChatRoutes(app: FastifyInstance): Promise<void> {
           createdAt: message.createdAt
         }
       });
+    }
+
+    // Push notification to peer
+    const peerTokens = await getPushTokensByUserId(peerId);
+    if (peerTokens.length > 0) {
+      const senderName = (await getUserById(session.userId))?.displayName ?? session.email;
+      const preview = parsed.data.content.trim().slice(0, 80);
+      await emitPushNotification({
+        userId: peerId,
+        title: "New message",
+        body: `${senderName}: ${preview}`,
+        deviceTokens: peerTokens.map(t => t.deviceToken),
+        data: { threadId: thread.id, type: "chat_message" }
+      }).catch(() => {});
     }
 
     return reply.status(201).send({

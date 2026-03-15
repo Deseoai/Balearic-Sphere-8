@@ -2291,3 +2291,46 @@ export async function deleteEliteMessagesBefore(cutoffIso: string): Promise<void
   const db = requirePool();
   await db.query(`delete from app_elite_messages where created_at < $1::timestamptz`, [cutoffIso]);
 }
+
+// ─── Push Tokens ────────────────────────────────────────────────────────────
+
+export type PushToken = {
+  id: string;
+  userId: string;
+  deviceToken: string;
+  platform: "ios" | "android";
+  createdAt: string;
+};
+
+export async function savePushToken(token: PushToken): Promise<void> {
+  const db = requirePool();
+  await db.query(
+    `insert into app_push_tokens (id, user_id, device_token, platform, created_at)
+     values ($1, $2, $3, $4, $5)
+     on conflict (user_id, device_token) do update set platform = excluded.platform`,
+    [token.id, token.userId, token.deviceToken, token.platform, token.createdAt]
+  );
+}
+
+export async function deletePushToken(userId: string, deviceToken: string): Promise<void> {
+  const db = requirePool();
+  await db.query(
+    `delete from app_push_tokens where user_id = $1 and device_token = $2`,
+    [userId, deviceToken]
+  );
+}
+
+export async function getPushTokensByUserId(userId: string): Promise<PushToken[]> {
+  const db = requirePool();
+  const res = await db.query(
+    `select id, user_id, device_token, platform, created_at from app_push_tokens where user_id = $1`,
+    [userId]
+  );
+  return res.rows.map(row => ({
+    id: String(row.id),
+    userId: String(row.user_id),
+    deviceToken: String(row.device_token),
+    platform: row.platform as "ios" | "android",
+    createdAt: toIso(row.created_at)
+  }));
+}

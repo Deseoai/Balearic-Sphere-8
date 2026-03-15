@@ -950,6 +950,36 @@ export function getNetworkGraph(input: {
 }
 
 
+// ─── Push Tokens ────────────────────────────────────────────────────────────
+
+type PushToken = {
+  id: string;
+  userId: string;
+  deviceToken: string;
+  platform: "ios" | "android";
+  createdAt: string;
+};
+
+const pushTokens: PushToken[] = [];
+
+export async function savePushToken(token: PushToken): Promise<void> {
+  const idx = pushTokens.findIndex(t => t.userId === token.userId && t.deviceToken === token.deviceToken);
+  if (idx >= 0) {
+    pushTokens[idx] = token;
+  } else {
+    pushTokens.push(token);
+  }
+}
+
+export async function deletePushToken(userId: string, deviceToken: string): Promise<void> {
+  const idx = pushTokens.findIndex(t => t.userId === userId && t.deviceToken === deviceToken);
+  if (idx >= 0) pushTokens.splice(idx, 1);
+}
+
+export async function getPushTokensByUserId(userId: string): Promise<PushToken[]> {
+  return pushTokens.filter(t => t.userId === userId);
+}
+
 export async function savePitch(pitch: {
   id: string; senderId: string; recipientId: string;
   title: string; summary: string; deckUrl?: string; ask: string;

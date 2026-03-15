@@ -336,3 +336,14 @@ create table if not exists app_deal_room_messages (
 );
 
 create index if not exists app_deal_room_messages_room_idx on app_deal_room_messages(room_id, created_at asc);
+
+create table if not exists app_push_tokens (
+  id text primary key,
+  user_id text not null,
+  device_token text not null,
+  platform text not null check (platform in ('ios', 'android')),
+  created_at timestamptz not null default now(),
+  unique(user_id, device_token)
+);
+
+create index if not exists app_push_tokens_user_idx on app_push_tokens(user_id);

@@ -509,3 +509,25 @@ export async function listEliteMessages(limit?: number): Promise<Array<{ id: str
 export async function deleteEliteMessagesBefore(cutoffIso: string): Promise<void> {
   return usePostgres ? postgres.deleteEliteMessagesBefore(cutoffIso) : Promise.resolve();
 }
+
+// ─── Push Tokens ────────────────────────────────────────────────────────────
+
+export type PushToken = {
+  id: string;
+  userId: string;
+  deviceToken: string;
+  platform: "ios" | "android";
+  createdAt: string;
+};
+
+export async function savePushToken(token: PushToken): Promise<void> {
+  return usePostgres ? postgres.savePushToken(token) : memory.savePushToken(token);
+}
+
+export async function deletePushToken(userId: string, deviceToken: string): Promise<void> {
+  return usePostgres ? postgres.deletePushToken(userId, deviceToken) : memory.deletePushToken(userId, deviceToken);
+}
+
+export async function getPushTokensByUserId(userId: string): Promise<PushToken[]> {
+  return usePostgres ? postgres.getPushTokensByUserId(userId) : memory.getPushTokensByUserId(userId);
+}

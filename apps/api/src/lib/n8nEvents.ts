@@ -186,6 +186,26 @@ export async function emitRewardEvent(input: {
   return postWebhook(env.N8N_REWARDS_WEBHOOK_URL, payload);
 }
 
+export async function emitPushNotification(input: {
+  userId: string;
+  title: string;
+  body: string;
+  deviceTokens: string[];
+  data?: Record<string, string>;
+}): Promise<DispatchResult> {
+  const payload = makePayload({
+    event: "push.notification.send",
+    data: {
+      userId: input.userId,
+      title: input.title,
+      body: input.body,
+      deviceTokens: input.deviceTokens,
+      data: input.data ?? {}
+    }
+  });
+  return postWebhook(env.N8N_PUSH_WEBHOOK_URL, payload);
+}
+
 export async function emitEmailAlert(input: {
   event: string;
   data: Record<string, unknown>;
