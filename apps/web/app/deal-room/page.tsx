@@ -1,4 +1,5 @@
 import DealRoomHub from "../../components/deal-room-hub";
+import { TopNav } from "../../components/top-nav";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,5 +8,12 @@ export const metadata: Metadata = {
 };
 
 export default function DealRoomPage() {
-  return <DealRoomHub />;
+  return (
+    <main className="world-member app-shell lg:with-ai-rail">
+      <TopNav />
+      <div className="mt-6 pb-28">
+        <DealRoomHub />
+      </div>
+    </main>
+  );
 }
