@@ -42,7 +42,7 @@ export default function VerifyScreen() {
         finalToken = match ? decodeURIComponent(match[1]) : input;
       }
       const res = await verifyMagicLink(finalToken);
-      await setToken(res.token);
+      await setToken(res.sessionToken ?? res.token ?? "");
       router.replace("/(app)/workspace");
     } catch {
       setError("Invalid or expired token. Please request a new magic link.");

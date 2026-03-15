@@ -151,7 +151,7 @@ export const requestMagicLink = (email: string) =>
   });
 
 export const verifyMagicLink = (token: string) =>
-  apiFetch<{ token: string; user: User }>("/v1/auth/verify-magic-link", {
+  apiFetch<{ sessionToken: string; token?: string; user: User }>("/v1/auth/verify-magic-link", {
     method: "POST",
     body: JSON.stringify({ token }),
   });
